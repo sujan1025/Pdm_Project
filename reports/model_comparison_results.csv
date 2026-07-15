@@ -1,0 +1,4 @@
+Model,Best CV F1-score,Accuracy,Precision,Recall,F1-score,ROC-AUC,Best Parameters
+Logistic Regression,0.2383,0.828,0.1443,0.8235,0.2456,0.9075,{'classifier__C': 0.1}
+Random Forest,0.6308,0.9655,0.495,0.7353,0.5917,0.9726,"{'classifier__max_depth': None, 'classifier__min_samples_split': 2, 'classifier__n_estimators': 200}"
+Gradient Boosting,0.6384,0.974,0.5851,0.8088,0.679,0.9712,"{'classifier__learning_rate': 0.1, 'classifier__max_depth': 5, 'classifier__n_estimators': 200}"

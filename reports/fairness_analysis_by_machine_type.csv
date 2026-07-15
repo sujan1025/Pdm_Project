@@ -1,0 +1,4 @@
+Machine Type,Total Test Records,Actual Failures,Predicted Failures,Accuracy,Precision,Recall,F1-score,ROC-AUC
+H,214,5,2,0.986,1.0,0.4,0.5714,0.9866
+L,1170,38,62,0.9692,0.5161,0.8421,0.64,0.9745
+M,616,25,30,0.9789,0.7,0.84,0.7636,0.9648
