@@ -38,10 +38,9 @@ FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 def main():
     if not DATA_PATH.exists():
         print("ERROR: Cleaned dataset not found.")
-        print("Please run Step 2 first to create data/ai4i2020_cleaned.csv")
         return
 
-    print("\nSTEP 4: MODEL TRAINING AND COMPARISON STARTED")
+    print("\nMODEL TRAINING AND COMPARISON STARTED")
     print("---------------------------------------------")
 
     # Load cleaned dataset
@@ -287,7 +286,7 @@ def main():
     summary_path = REPORTS_DIR / "best_model_summary.txt"
 
     with open(summary_path, "w", encoding="utf-8") as f:
-        f.write("STEP 4 MODEL TRAINING SUMMARY\n")
+        f.write("MODEL TRAINING SUMMARY\n")
         f.write("=============================\n\n")
 
         f.write("Models compared:\n")
@@ -315,8 +314,7 @@ def main():
         f.write("Model comparison results:\n")
         f.write(results_df.to_string(index=False))
 
-    print("\nSTEP 4 COMPLETED SUCCESSFULLY")
-    print("-----------------------------")
+    print("\n-----------------------------")
     print("Model comparison saved at: reports/model_comparison_results.csv")
     print("Best model summary saved at: reports/best_model_summary.txt")
     print(f"Best model saved at: {best_model_path}")

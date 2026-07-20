@@ -286,8 +286,7 @@ def main():
             "machine types to check whether performance differed across product categories.\n"
         )
 
-    print("\nSTEP 5 COMPLETED SUCCESSFULLY")
-    print("-----------------------------")
+    print("\n-----------------------------")
     print("Final metrics saved at: reports/final_model_metrics.csv")
     print("Final classification report saved at: reports/final_classification_report.csv")
     print("Final confusion matrix saved at: reports/final_confusion_matrix.csv")

@@ -131,7 +131,7 @@ def main():
         f.write("- Numerical histograms were created for the five main sensor features.\n")
         f.write("- These plots help understand feature distributions before preprocessing.\n")
 
-    print("\nSTEP 2.2 EDA VISUALISATION COMPLETED")
+    print("\nEDA VISUALISATION COMPLETED")
     print("------------------------------------")
     print("Charts saved inside: reports/figures")
     print("EDA summary saved as: reports/eda_findings.txt")

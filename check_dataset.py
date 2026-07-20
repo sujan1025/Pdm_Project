@@ -5,7 +5,7 @@ DATA_PATH = Path("data/ai4i2020.csv")
 
 def main():
     if not DATA_PATH.exists():
-        print("Dataset not found. Make sure it is saved as data/ai4i2020.csv")
+        print("Dataset not found.")
         return
 
     df = pd.read_csv(DATA_PATH)
@@ -50,7 +50,6 @@ def main():
     ]
     print(df[numerical_cols].describe())
 
-    print("\nStep 2.1 raw dataset checking completed.")
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,4 @@
-STEP 3 PREPROCESSING SUMMARY
+PREPROCESSING SUMMARY
 ============================
 
 Dataset used:

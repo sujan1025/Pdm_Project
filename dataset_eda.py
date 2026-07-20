@@ -8,7 +8,6 @@ def main():
     # Check dataset exists
     if not DATA_PATH.exists():
         print("ERROR: Dataset not found.")
-        print("Make sure the file is saved as data/ai4i2020.csv")
         return
 
     # Load dataset
@@ -78,8 +77,6 @@ def main():
         "Tool wear [min]"
     ]
     print(df[numerical_columns].describe())
-
-    print("\nStep 2 completed successfully.")
 
 
 if __name__ == "__main__":

@@ -24,7 +24,6 @@ def main():
     # Check dataset exists
     if not DATA_PATH.exists():
         print("ERROR: Dataset not found.")
-        print("Please make sure your dataset is saved as:")
         print(DATA_PATH)
         return
 
@@ -197,7 +196,7 @@ def main():
     # ==============================
     # Console output
     # ==============================
-    print("\nSTEP 2: EDA AND BASIC CLEANING COMPLETED SUCCESSFULLY")
+    print("\nEDA AND BASIC CLEANING COMPLETED SUCCESSFULLY")
     print("----------------------------------------------------")
     print(f"Original dataset shape: {df.shape}")
     print(f"Cleaned dataset shape: {df_cleaned.shape}")

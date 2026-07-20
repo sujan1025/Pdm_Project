@@ -21,13 +21,12 @@ def main():
     # Check cleaned dataset exists
     if not DATA_PATH.exists():
         print("ERROR: Cleaned dataset not found.")
-        print("Please run Step 2 first to create data/ai4i2020_cleaned.csv")
         return
 
     # Load cleaned dataset
     df = pd.read_csv(DATA_PATH)
 
-    print("\nSTEP 3: PREPROCESSING STARTED")
+    print("\nPREPROCESSING STARTED")
     print("-----------------------------")
     print("Cleaned dataset loaded successfully.")
     print("Dataset shape:", df.shape)
@@ -142,7 +141,7 @@ def main():
     summary_path = REPORTS_DIR / "preprocessing_summary.txt"
 
     with open(summary_path, "w", encoding="utf-8") as f:
-        f.write("STEP 3 PREPROCESSING SUMMARY\n")
+        f.write("PREPROCESSING SUMMARY\n")
         f.write("============================\n\n")
 
         f.write("Dataset used:\n")
@@ -189,7 +188,6 @@ def main():
             "This avoids data leakage and keeps evaluation realistic.\n"
         )
 
-    print("\nSTEP 3 COMPLETED SUCCESSFULLY")
     print("-----------------------------")
     print(f"Preprocessor saved at: {MODELS_DIR / 'preprocessor.pkl'}")
     print(f"Preprocessing summary saved at: {summary_path}")
