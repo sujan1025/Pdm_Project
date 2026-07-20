@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Predictive Maintenance DSS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Predictive Maintenance Decision Support System</h1>
+
+        <p>
+            This system predicts early machine failure using a trained machine learning model.
+            It supports engineers by giving a failure probability and maintenance recommendation.
+        </p>
+
+        <div class="card">
+            <h2>System Features</h2>
+            <ul>
+                <li>Machine failure prediction</li>
+                <li>Failure probability score</li>
+                <li>Maintenance recommendation</li>
+                <li>Decision support output</li>
+            </ul>
+        </div>
+
+        <a class="button" href="{{ url_for('main.predict') }}">Go to Prediction Page</a>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction Result</title>
+</head>
+<body>
+
+    <h1>Prediction Result</h1>
+
+    <h2>{{ result.status }}</h2>
+
+    <p><strong>Prediction:</strong> {{ result.prediction }}</p>
+    <p><strong>Failure Probability:</strong> {{ result.failure_probability }}%</p>
+    <p><strong>Recommendation:</strong> {{ result.recommendation }}</p>
+
+    <h3>Input Values</h3>
+
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>Feature</th>
+            <th>Value</th>
+        </tr>
+
+        {% for key, value in input_values.items() %}
+        <tr>
+            <td>{{ key }}</td>
+            <td>{{ value }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <br>
+    <a href="/predict">Make Another Prediction</a>
+    <br>
+    <a href="/">Back to Dashboard</a>
+
+</body>
+</html>
