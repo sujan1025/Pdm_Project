@@ -2,37 +2,97 @@
 <html>
 <head>
     <title>Prediction Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-    <h1>Prediction Result</h1>
+    <nav class="navbar">
+        <div class="nav-brand">Predictive Maintenance DSS</div>
+        <div class="nav-links">
+            <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('main.predict') }}">Prediction</a>
+        </div>
+    </nav>
 
-    <h2>{{ result.status }}</h2>
+    <main class="container">
 
-    <p><strong>Prediction:</strong> {{ result.prediction }}</p>
-    <p><strong>Failure Probability:</strong> {{ result.failure_probability }}%</p>
-    <p><strong>Recommendation:</strong> {{ result.recommendation }}</p>
+        <div class="page-header">
+            <p class="eyebrow">Prediction Result</p>
+            <h1>Machine Failure Assessment</h1>
+            <p>The prediction below is generated using the trained machine learning model.</p>
+        </div>
 
-    <h3>Input Values</h3>
+        <div class="result-summary">
+            <div class="result-main">
+                <p class="result-label">System Status</p>
+                <h2>{{ result.status }}</h2>
+                <p>{{ result.recommendation }}</p>
+            </div>
 
-    <table border="1" cellpadding="8">
-        <tr>
-            <th>Feature</th>
-            <th>Value</th>
-        </tr>
+            <div class="probability-box">
+                <p>Failure Probability</p>
+                <h2>{{ result.failure_probability }}%</h2>
+            </div>
+        </div>
 
-        {% for key, value in input_values.items() %}
-        <tr>
-            <td>{{ key }}</td>
-            <td>{{ value }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+        <div class="card-grid two-column">
+            <div class="info-card">
+                <h3>Prediction Output</h3>
+                <table>
+                    <tr>
+                        <th>Item</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr>
+                        <td>Prediction</td>
+                        <td>{{ result.prediction }}</td>
+                    </tr>
+                    <tr>
+                        <td>Status</td>
+                        <td>{{ result.status }}</td>
+                    </tr>
+                    <tr>
+                        <td>Failure Probability</td>
+                        <td>{{ result.failure_probability }}%</td>
+                    </tr>
+                </table>
+            </div>
 
-    <br>
-    <a href="/predict">Make Another Prediction</a>
-    <br>
-    <a href="/">Back to Dashboard</a>
+            <div class="info-card">
+                <h3>Input Values</h3>
+                <table>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Value</th>
+                    </tr>
+
+                    {% for key, value in input_values.items() %}
+                    <tr>
+                        <td>{{ key }}</td>
+                        <td>{{ value }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+        <div class="cta-panel">
+            <div>
+                <h2>Next Action</h2>
+                <p>Use this result as decision support and review the machine condition if risk is detected.</p>
+            </div>
+
+            <div>
+                <a class="button primary" href="{{ url_for('main.predict') }}">Make Another Prediction</a>
+                <a class="button secondary" href="{{ url_for('main.dashboard') }}">Back to Dashboard</a>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>MSc Computer Science Project | Predictive Maintenance Decision Support System</p>
+    </footer>
 
 </body>
 </html>

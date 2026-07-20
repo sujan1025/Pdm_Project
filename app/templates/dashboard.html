@@ -6,26 +6,98 @@
 </head>
 <body>
 
-    <div class="container">
-        <h1>Predictive Maintenance Decision Support System</h1>
+    <nav class="navbar">
+        <div class="nav-brand">Predictive Maintenance DSS</div>
+        <div class="nav-links">
+            <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('main.predict') }}">Prediction</a>
+        </div>
+    </nav>
 
-        <p>
-            This system predicts early machine failure using a trained machine learning model.
-            It supports engineers by giving a failure probability and maintenance recommendation.
-        </p>
+    <section class="hero">
+        <div class="hero-content">
+            <p class="eyebrow">Machine Learning Decision Support System</p>
+            <h1>Early Machine Failure Detection for Predictive Maintenance</h1>
+            <p class="hero-text">
+                A secure decision support prototype that predicts machine failure risk using
+                operational sensor values and provides maintenance recommendations for engineers.
+            </p>
 
-        <div class="card">
-            <h2>System Features</h2>
-            <ul>
-                <li>Machine failure prediction</li>
-                <li>Failure probability score</li>
-                <li>Maintenance recommendation</li>
-                <li>Decision support output</li>
-            </ul>
+            <div class="hero-actions">
+                <a class="button primary" href="{{ url_for('main.predict') }}">Start Prediction</a>
+                <a class="button secondary" href="#overview">View System Overview</a>
+            </div>
+        </div>
+    </section>
+
+    <main class="container" id="overview">
+
+        <div class="section-title">
+            <h2>System Overview</h2>
+            <p>The system combines machine learning prediction with a clear decision-support interface.</p>
         </div>
 
-        <a class="button" href="{{ url_for('main.predict') }}">Go to Prediction Page</a>
-    </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>10,000</h3>
+                <p>Dataset records analysed</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>3.39%</h3>
+                <p>Failure records in dataset</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>80:20</h3>
+                <p>Train-test split used</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>GB</h3>
+                <p>Final selected model</p>
+            </div>
+        </div>
+
+        <div class="card-grid">
+            <div class="info-card">
+                <h3>Failure Prediction</h3>
+                <p>
+                    Predicts whether a machine is likely to fail based on temperature,
+                    rotational speed, torque, tool wear, and product type.
+                </p>
+            </div>
+
+            <div class="info-card">
+                <h3>Decision Support Output</h3>
+                <p>
+                    Provides a clear prediction result, failure probability score, and
+                    maintenance recommendation to support engineering decisions.
+                </p>
+            </div>
+
+            <div class="info-card">
+                <h3>ML Evaluation</h3>
+                <p>
+                    The model was evaluated using accuracy, precision, recall, F1-score,
+                    ROC-AUC, confusion matrix, and fairness analysis across machine types.
+                </p>
+            </div>
+        </div>
+
+        <div class="cta-panel">
+            <div>
+                <h2>Ready to assess a machine?</h2>
+                <p>Enter the operating values and receive an instant risk prediction.</p>
+            </div>
+            <a class="button primary" href="{{ url_for('main.predict') }}">Go to Prediction Page</a>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>MSc Computer Science Project | Predictive Maintenance Decision Support System</p>
+    </footer>
 
 </body>
 </html>

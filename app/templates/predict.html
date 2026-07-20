@@ -6,50 +6,92 @@
 </head>
 <body>
 
-    <div class="container">
-        <h1>Machine Failure Prediction</h1>
+    <nav class="navbar">
+        <div class="nav-brand">Predictive Maintenance DSS</div>
+        <div class="nav-links">
+            <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('main.predict') }}">Prediction</a>
+        </div>
+    </nav>
 
-        <p>
-            Enter machine operating values below. The system will predict whether
-            the machine is at risk of failure.
-        </p>
+    <main class="container">
+
+        <div class="page-header">
+            <p class="eyebrow">Prediction Module</p>
+            <h1>Machine Failure Risk Prediction</h1>
+            <p>
+                Enter machine operating conditions below. The system will estimate failure risk
+                using the trained Gradient Boosting model.
+            </p>
+        </div>
 
         {% if error %}
-            <div class="error">
-                {{ error }}
+            <div class="alert-error">
+                <strong>Prediction Error:</strong> {{ error }}
             </div>
         {% endif %}
 
-        <form method="POST" class="form-card">
+        <div class="form-layout">
+            <form method="POST" class="business-form">
 
-            <label>Machine Type</label>
-            <select name="machine_type" required>
-                <option value="L">L - Low Quality</option>
-                <option value="M">M - Medium Quality</option>
-                <option value="H">H - High Quality</option>
-            </select>
+                <div class="form-section">
+                    <h2>Machine Information</h2>
 
-            <label>Air Temperature [K]</label>
-            <input type="number" step="0.1" name="air_temperature" required>
+                    <label>Machine Type</label>
+                    <select name="machine_type" required>
+                        <option value="L">L - Low Quality</option>
+                        <option value="M">M - Medium Quality</option>
+                        <option value="H">H - High Quality</option>
+                    </select>
+                </div>
 
-            <label>Process Temperature [K]</label>
-            <input type="number" step="0.1" name="process_temperature" required>
+                <div class="form-section">
+                    <h2>Operating Parameters</h2>
 
-            <label>Rotational Speed [rpm]</label>
-            <input type="number" step="1" name="rotational_speed" required>
+                    <label>Air Temperature [K]</label>
+                    <input type="number" step="0.1" name="air_temperature" placeholder="Example: 298.1" required>
 
-            <label>Torque [Nm]</label>
-            <input type="number" step="0.1" name="torque" required>
+                    <label>Process Temperature [K]</label>
+                    <input type="number" step="0.1" name="process_temperature" placeholder="Example: 308.6" required>
 
-            <label>Tool Wear [min]</label>
-            <input type="number" step="1" name="tool_wear" required>
+                    <label>Rotational Speed [rpm]</label>
+                    <input type="number" step="1" name="rotational_speed" placeholder="Example: 1551" required>
 
-            <button type="submit">Predict Failure Risk</button>
-        </form>
+                    <label>Torque [Nm]</label>
+                    <input type="number" step="0.1" name="torque" placeholder="Example: 42.8" required>
 
-        <br>
-        <a href="{{ url_for('main.dashboard') }}">Back to Dashboard</a>
-    </div>
+                    <label>Tool Wear [min]</label>
+                    <input type="number" step="1" name="tool_wear" placeholder="Example: 0" required>
+                </div>
+
+                <button type="submit" class="button primary full-width">Predict Failure Risk</button>
+            </form>
+
+            <aside class="side-panel">
+                <h2>Input Guidance</h2>
+                <p>
+                    Use realistic machine operating values from the AI4I predictive maintenance dataset range.
+                </p>
+
+                <ul>
+                    <li><strong>Air temperature:</strong> around 295–305 K</li>
+                    <li><strong>Process temperature:</strong> around 305–314 K</li>
+                    <li><strong>Rotational speed:</strong> around 1168–2886 rpm</li>
+                    <li><strong>Torque:</strong> around 3.8–76.6 Nm</li>
+                    <li><strong>Tool wear:</strong> around 0–253 min</li>
+                </ul>
+
+                <div class="note-box">
+                    <strong>Note:</strong> This system is a decision support tool. Final maintenance decisions should be reviewed by an engineer.
+                </div>
+            </aside>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>MSc Computer Science Project | Predictive Maintenance Decision Support System</p>
+    </footer>
 
 </body>
 </html>
