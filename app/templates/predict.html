@@ -11,6 +11,8 @@
         <div class="nav-links">
             <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
             <a href="{{ url_for('main.predict') }}">Prediction</a>
+            <a href="{{ url_for('main.history') }}">History</a>
+            <a href="{{ url_for('main.logout') }}">Logout</a>       
         </div>
     </nav>
 
@@ -33,6 +35,7 @@
 
         <div class="form-layout">
             <form method="POST" class="business-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">  
 
                 <div class="form-section">
                     <h2>Machine Information</h2>

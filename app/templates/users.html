@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Users | Predictive Maintenance DSS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-brand">Predictive Maintenance DSS</div>
+        <div class="nav-links">
+            <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('main.predict') }}">Prediction</a>
+            <a href="{{ url_for('main.history') }}">History</a>
+            <a href="{{ url_for('main.logout') }}">Logout</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="page-header">
+            <p class="eyebrow">Admin Panel</p>
+            <h1>User Accounts</h1>
+            <p>Only administrators can view this page.</p>
+        </div>
+
+        <div class="info-card">
+            <table>
+                <tr>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Prediction Count</th>
+                </tr>
+
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.role }}</td>
+                    <td>{{ user.predictions|length }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </main>
+
+</body>
+</html>

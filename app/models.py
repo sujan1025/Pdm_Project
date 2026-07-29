@@ -24,8 +24,8 @@ class User(UserMixin, db.Model):
 
     def set_password(self, password):
         password_bytes = password.encode("utf-8")
-        hashed = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
-        self.password_hash = hashed.decode("utf-8")
+        hashed_password = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
+        self.password_hash = hashed_password.decode("utf-8")
 
     def check_password(self, password):
         password_bytes = password.encode("utf-8")

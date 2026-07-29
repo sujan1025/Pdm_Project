@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Prediction Result</title>
+    <title>Prediction Result | Predictive Maintenance DSS</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -11,6 +11,13 @@
         <div class="nav-links">
             <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
             <a href="{{ url_for('main.predict') }}">Prediction</a>
+            <a href="{{ url_for('main.history') }}">History</a>
+
+            {% if current_user.role == "admin" %}
+                <a href="{{ url_for('main.users') }}">Users</a>
+            {% endif %}
+
+            <a href="{{ url_for('main.logout') }}">Logout</a>
         </div>
     </nav>
 
@@ -19,7 +26,10 @@
         <div class="page-header">
             <p class="eyebrow">Prediction Result</p>
             <h1>Machine Failure Assessment</h1>
-            <p>The prediction below is generated using the trained machine learning model.</p>
+            <p>
+                The prediction below is generated using the trained Gradient Boosting model.
+                The result should support, not replace, engineering judgement.
+            </p>
         </div>
 
         <div class="result-summary">
@@ -36,8 +46,10 @@
         </div>
 
         <div class="card-grid two-column">
+
             <div class="info-card">
                 <h3>Prediction Output</h3>
+
                 <table>
                     <tr>
                         <th>Item</th>
@@ -45,7 +57,13 @@
                     </tr>
                     <tr>
                         <td>Prediction</td>
-                        <td>{{ result.prediction }}</td>
+                        <td>
+                            {% if result.prediction == 1 %}
+                                1 - Failure Risk
+                            {% else %}
+                                0 - No Failure
+                            {% endif %}
+                        </td>
                     </tr>
                     <tr>
                         <td>Status</td>
@@ -55,11 +73,16 @@
                         <td>Failure Probability</td>
                         <td>{{ result.failure_probability }}%</td>
                     </tr>
+                    <tr>
+                        <td>Recommendation</td>
+                        <td>{{ result.recommendation }}</td>
+                    </tr>
                 </table>
             </div>
 
             <div class="info-card">
                 <h3>Input Values</h3>
+
                 <table>
                     <tr>
                         <th>Feature</th>
@@ -74,16 +97,29 @@
                     {% endfor %}
                 </table>
             </div>
+
+        </div>
+
+        <div class="info-card">
+            <h3>Decision Support Note</h3>
+            <p>
+                This system provides a machine learning-based risk prediction using machine
+                operating parameters. If failure risk is detected, the machine should be reviewed
+                by an engineer before any maintenance action is taken.
+            </p>
         </div>
 
         <div class="cta-panel">
             <div>
                 <h2>Next Action</h2>
-                <p>Use this result as decision support and review the machine condition if risk is detected.</p>
+                <p>
+                    Make another prediction, review the prediction history, or return to the dashboard.
+                </p>
             </div>
 
             <div>
                 <a class="button primary" href="{{ url_for('main.predict') }}">Make Another Prediction</a>
+                <a class="button secondary" href="{{ url_for('main.history') }}">View History</a>
                 <a class="button secondary" href="{{ url_for('main.dashboard') }}">Back to Dashboard</a>
             </div>
         </div>

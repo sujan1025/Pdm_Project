@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction History | Predictive Maintenance DSS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-brand">Predictive Maintenance DSS</div>
+        <div class="nav-links">
+            <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('main.predict') }}">Prediction</a>
+            <a href="{{ url_for('main.history') }}">History</a>
+
+            {% if current_user.role == "admin" %}
+                <a href="{{ url_for('main.users') }}">Users</a>
+            {% endif %}
+
+            <a href="{{ url_for('main.logout') }}">Logout</a>
+        </div>
+    </nav>
+
+    <main class="container">
+
+        <div class="page-header">
+            <p class="eyebrow">Audit Trail</p>
+            <h1>Prediction History</h1>
+            <p>
+                This page stores previous machine failure predictions for review,
+                accountability, and decision-support traceability.
+            </p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>{{ records|length }}</h3>
+                <p>Prediction records shown</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>{{ current_user.role|capitalize }}</h3>
+                <p>Current user role</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>{{ current_user.username }}</h3>
+                <p>Logged-in user</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Audit</h3>
+                <p>Prediction history enabled</p>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h3>Stored Prediction Records</h3>
+
+            {% if records %}
+                <table>
+                    <tr>
+                        <th>Date</th>
+
+                        {% if current_user.role == "admin" %}
+                            <th>User</th>
+                        {% endif %}
+
+                        <th>Machine Type</th>
+                        <th>Prediction</th>
+                        <th>Failure Probability</th>
+                        <th>Status</th>
+                        <th>Torque</th>
+                        <th>Tool Wear</th>
+                    </tr>
+
+                    {% for record in records %}
+                    <tr>
+                        <td>{{ record.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+
+                        {% if current_user.role == "admin" %}
+                            <td>{{ record.user.username }}</td>
+                        {% endif %}
+
+                        <td>{{ record.machine_type }}</td>
+
+                        <td>
+                            {% if record.prediction == 1 %}
+                                1 - Failure Risk
+                            {% else %}
+                                0 - No Failure
+                            {% endif %}
+                        </td>
+
+                        <td>{{ record.failure_probability }}%</td>
+                        <td>{{ record.status }}</td>
+                        <td>{{ record.torque }}</td>
+                        <td>{{ record.tool_wear }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p>No prediction history has been recorded yet.</p>
+                <a class="button primary" href="{{ url_for('main.predict') }}">Make First Prediction</a>
+            {% endif %}
+        </div>
+
+        <div class="cta-panel">
+            <div>
+                <h2>Continue Analysis</h2>
+                <p>
+                    Make another prediction or return to the dashboard to review the system overview.
+                </p>
+            </div>
+
+            <div>
+                <a class="button primary" href="{{ url_for('main.predict') }}">Make Prediction</a>
+                <a class="button secondary" href="{{ url_for('main.dashboard') }}">Back to Dashboard</a>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>MSc Computer Science Project | Predictive Maintenance Decision Support System</p>
+    </footer>
+
+</body>
+</html>
