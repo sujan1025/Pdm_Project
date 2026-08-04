@@ -1,10 +1,9 @@
 PREPROCESSING SUMMARY
-============================
+--------------------------------------------------
 
-Dataset used:
-data\ai4i2020_cleaned.csv
+Cleaned dataset shape: (10000, 12)
 
-Input features:
+Selected feature columns:
 - Type
 - Air temperature [K]
 - Process temperature [K]
@@ -12,27 +11,8 @@ Input features:
 - Torque [Nm]
 - Tool wear [min]
 
-Target column:
-- Machine failure
+Target column: Machine failure
 
-Excluded leakage columns:
-- TWF
-- HDF
-- PWF
-- OSF
-- RNF
-
-Original target distribution:
-Machine failure
-0    9661
-1     339
-
-Original target percentage:
-Machine failure
-0    96.61
-1     3.39
-
-Train-test split:
 Training set shape: (8000, 6)
 Testing set shape: (2000, 6)
 
@@ -40,20 +20,21 @@ Training target distribution before SMOTE:
 Machine failure
 0    7729
 1     271
+Name: count, dtype: int64
 
 Testing target distribution:
 Machine failure
 0    1932
 1      68
-
-Processed data shapes:
-Processed training shape: (8000, 8)
-Processed testing shape: (2000, 8)
+Name: count, dtype: int64
 
 Training target distribution after SMOTE:
 Machine failure
 0    7729
 1    7729
+Name: count, dtype: int64
 
-Explanation:
-The Type column was encoded using OneHotEncoder. Numerical machine readings were scaled using StandardScaler. SMOTE was applied only to the training data to balance the failure and non-failure classes without changing the test set. This avoids data leakage and keeps evaluation realistic.
+Preprocessing steps used:
+- One-hot encoding for Type column
+- Standard scaling for numerical columns
+- SMOTE applied only on the training set

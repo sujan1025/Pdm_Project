@@ -1,23 +1,15 @@
-STEP 5 FINAL EVALUATION SUMMARY
-===============================
+FINAL MODEL EVALUATION SUMMARY
+--------------------------------------------------
 
-Selected final model:
-Gradient Boosting
-
-Final test set metrics:
-            Model  Accuracy  Precision  Recall  F1-score  ROC-AUC
-Gradient Boosting     0.974     0.5851  0.8088     0.679   0.9712
-
-Confusion matrix:
-                   Predicted No Failure  Predicted Failure
-Actual No Failure                  1893                 39
-Actual Failure                       13                 55
+Final test set performance:
+Accuracy: 0.9740
+Precision: 0.5851
+Recall: 0.8088
+F1-score: 0.6790
+ROC-AUC: 0.9699
 
 Fairness analysis by machine type:
-Machine Type  Total Test Records  Actual Failures  Predicted Failures  Accuracy  Precision  Recall  F1-score  ROC-AUC
-           H                 214                5                   2    0.9860     1.0000  0.4000    0.5714   0.9866
-           L                1170               38                  62    0.9692     0.5161  0.8421    0.6400   0.9745
-           M                 616               25                  30    0.9789     0.7000  0.8400    0.7636   0.9648
-
-Interpretation:
-The final Gradient Boosting model was evaluated on the unchanged test set. The test set was not oversampled, so the results represent realistic performance on imbalanced data. Recall and F1-score are important because missed machine failures are more serious than false alarms. Fairness analysis was performed across L, M and H machine types to check whether performance differed across product categories.
+Machine Type  Total Records  Actual Failures  Predicted Failures  Precision   Recall  F1-score  ROC-AUC
+           L           1170               38                  61   0.508197 0.815789  0.626263 0.973219
+           M            616               25                  30   0.700000 0.840000  0.763636 0.959865
+           H            214                5                   3   1.000000 0.600000  0.750000 0.994258

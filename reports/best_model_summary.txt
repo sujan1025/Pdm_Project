@@ -1,30 +1,12 @@
-STEP 4 MODEL TRAINING SUMMARY
-=============================
-
-Models compared:
-- Logistic Regression
-- Random Forest
-- Gradient Boosting
-
-Evaluation metrics:
-- Accuracy
-- Precision
-- Recall
-- F1-score
-- ROC-AUC
-
-Train-test split:
-80% training and 20% testing with stratified sampling.
-
-Class imbalance handling:
-SMOTE was applied only inside the training pipeline.
-The test set was not oversampled.
+BEST MODEL SUMMARY
+--------------------------------------------------
 
 Best model selected by test F1-score:
 Gradient Boosting
 
 Model comparison results:
-              Model  Best CV F1-score  Accuracy  Precision  Recall  F1-score  ROC-AUC                                                                                      Best Parameters
-Logistic Regression            0.2383    0.8280     0.1443  0.8235    0.2456   0.9075                                                                               {'classifier__C': 0.1}
-      Random Forest            0.6308    0.9655     0.4950  0.7353    0.5917   0.9726 {'classifier__max_depth': None, 'classifier__min_samples_split': 2, 'classifier__n_estimators': 200}
-  Gradient Boosting            0.6384    0.9740     0.5851  0.8088    0.6790   0.9712      {'classifier__learning_rate': 0.1, 'classifier__max_depth': 5, 'classifier__n_estimators': 200}
+              Model  Best CV F1  Accuracy  Precision   Recall  F1-score  ROC-AUC                                                                                      Best Parameters
+Logistic Regression    0.239442    0.8285   0.144703 0.823529  0.246154 0.907464                                                                               {'classifier__C': 0.1}
+      Random Forest    0.626546    0.9680   0.520833 0.735294  0.609756 0.974101 {'classifier__max_depth': None, 'classifier__min_samples_split': 2, 'classifier__n_estimators': 200}
+  Gradient Boosting    0.637933    0.9740   0.585106 0.808824  0.679012 0.969880      {'classifier__learning_rate': 0.1, 'classifier__max_depth': 5, 'classifier__n_estimators': 200}
+

@@ -1,327 +1,264 @@
+"""
+Model Training and Comparison
+
+This file trains and compares Logistic Regression, Random Forest,
+and Gradient Boosting models. The best model is selected using F1-score
+and saved for use in the Flask web application.
+"""
+
 from pathlib import Path
-import pandas as pd
+
 import joblib
 import matplotlib.pyplot as plt
-
-from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedKFold
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+import pandas as pd
+import seaborn as sns
+from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import Pipeline as ImbPipeline
 from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.metrics import (
     accuracy_score,
+    classification_report,
+    confusion_matrix,
+    f1_score,
     precision_score,
     recall_score,
-    f1_score,
     roc_auc_score,
-    confusion_matrix,
-    classification_report,
-    ConfusionMatrixDisplay,
     RocCurveDisplay,
 )
+from sklearn.model_selection import GridSearchCV, StratifiedKFold, train_test_split
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from imblearn.over_sampling import SMOTE
-from imblearn.pipeline import Pipeline
 
-
-# Paths
-DATA_PATH = Path("data/ai4i2020_cleaned.csv")
+# Set project folders
+DATA_DIR = Path("data")
 MODELS_DIR = Path("models")
 REPORTS_DIR = Path("reports")
-FIGURES_DIR = Path("reports/figures")
+FIGURES_DIR = Path("figures")
 
+# Create folders if they do not already exist
 MODELS_DIR.mkdir(exist_ok=True)
 REPORTS_DIR.mkdir(exist_ok=True)
-FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+FIGURES_DIR.mkdir(exist_ok=True)
 
+# Load the cleaned dataset
+df = pd.read_csv(DATA_DIR / "ai4i2020_cleaned.csv")
 
-def main():
-    if not DATA_PATH.exists():
-        print("ERROR: Cleaned dataset not found.")
-        return
+print("STEP 4: MODEL TRAINING STARTED")
+print("-" * 50)
 
-    print("\nMODEL TRAINING AND COMPARISON STARTED")
-    print("---------------------------------------------")
+# Select input features for prediction
+feature_columns = [
+    "Type",
+    "Air temperature [K]",
+    "Process temperature [K]",
+    "Rotational speed [rpm]",
+    "Torque [Nm]",
+    "Tool wear [min]",
+]
 
-    # Load cleaned dataset
-    df = pd.read_csv(DATA_PATH)
-    print("Dataset loaded successfully.")
-    print("Dataset shape:", df.shape)
+# Select target column
+target_column = "Machine failure"
 
-    # Input features
-    feature_columns = [
-        "Type",
-        "Air temperature [K]",
-        "Process temperature [K]",
-        "Rotational speed [rpm]",
-        "Torque [Nm]",
-        "Tool wear [min]",
+X = df[feature_columns]
+y = df[target_column]
+
+# Identify categorical and numerical columns
+categorical_features = ["Type"]
+
+numerical_features = [
+    "Air temperature [K]",
+    "Process temperature [K]",
+    "Rotational speed [rpm]",
+    "Torque [Nm]",
+    "Tool wear [min]",
+]
+
+# Split the data into training and testing sets
+# Stratify keeps the rare failure class proportion stable
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42,
+    stratify=y,
+)
+
+# Create preprocessing step for all models
+preprocessor = ColumnTransformer(
+    transformers=[
+        ("type_encoder", OneHotEncoder(handle_unknown="ignore"), categorical_features),
+        ("num_scaler", StandardScaler(), numerical_features),
     ]
+)
 
-    # Target
-    target_column = "Machine failure"
+# Define models to compare
+models = {
+    "Logistic Regression": LogisticRegression(max_iter=1000, random_state=42),
+    "Random Forest": RandomForestClassifier(random_state=42),
+    "Gradient Boosting": GradientBoostingClassifier(random_state=42),
+}
 
-    # These are not used as input features because they are failure-mode labels
-    leakage_columns = ["TWF", "HDF", "PWF", "OSF", "RNF"]
+# Define hyperparameter settings for each model
+parameter_grids = {
+    "Logistic Regression": {
+        "classifier__C": [0.1, 1, 10],
+    },
+    "Random Forest": {
+        "classifier__n_estimators": [100, 200],
+        "classifier__max_depth": [None, 10, 20],
+        "classifier__min_samples_split": [2, 5],
+    },
+    "Gradient Boosting": {
+        "classifier__n_estimators": [100, 200],
+        "classifier__learning_rate": [0.05, 0.1],
+        "classifier__max_depth": [3, 5],
+    },
+}
 
-    print("\nFeatures used:")
-    for col in feature_columns:
-        print("-", col)
+# Use stratified cross-validation because the dataset is imbalanced
+cross_validation = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42,
+)
 
-    print("\nTarget column:")
-    print("-", target_column)
+results = []
+trained_models = {}
 
-    print("\nExcluded leakage columns:")
-    for col in leakage_columns:
-        print("-", col)
+# Train and evaluate each model
+for model_name, model in models.items():
+    print(f"\nTraining model: {model_name}")
 
-    X = df[feature_columns]
-    y = df[target_column]
-
-    print("\nOriginal target distribution:")
-    print(y.value_counts())
-
-    # 80:20 stratified train-test split
-    X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        test_size=0.20,
-        random_state=42,
-        stratify=y,
-    )
-
-    print("\nTraining set shape:", X_train.shape)
-    print("Testing set shape:", X_test.shape)
-
-    print("\nTraining target distribution:")
-    print(y_train.value_counts())
-
-    print("\nTesting target distribution:")
-    print(y_test.value_counts())
-
-    # Feature groups
-    numerical_features = [
-        "Air temperature [K]",
-        "Process temperature [K]",
-        "Rotational speed [rpm]",
-        "Torque [Nm]",
-        "Tool wear [min]",
-    ]
-
-    categorical_features = ["Type"]
-
-    # OneHotEncoder compatibility for different scikit-learn versions
-    try:
-        onehot_encoder = OneHotEncoder(handle_unknown="ignore", sparse_output=False)
-    except TypeError:
-        onehot_encoder = OneHotEncoder(handle_unknown="ignore", sparse=False)
-
-    # Preprocessor
-    preprocessor = ColumnTransformer(
-        transformers=[
-            ("num", StandardScaler(), numerical_features),
-            ("cat", onehot_encoder, categorical_features),
+    # Create a full machine learning pipeline
+    # The pipeline applies preprocessing, SMOTE, and model training together
+    pipeline = ImbPipeline(
+        steps=[
+            ("preprocessor", preprocessor),
+            ("smote", SMOTE(random_state=42)),
+            ("classifier", model),
         ]
     )
 
-    # Cross-validation setup
-    cv = StratifiedKFold(
-        n_splits=5,
-        shuffle=True,
-        random_state=42,
+    # Use GridSearchCV to find the best hyperparameters
+    grid_search = GridSearchCV(
+        estimator=pipeline,
+        param_grid=parameter_grids[model_name],
+        scoring="f1",
+        cv=cross_validation,
+        n_jobs=-1,
     )
 
-    # Models and parameter grids
-    models = {
-        "Logistic Regression": {
-            "classifier": LogisticRegression(max_iter=2000, solver="liblinear", random_state=42),
-            "params": {
-                "classifier__C": [0.1, 1, 10],
-            },
-        },
-        "Random Forest": {
-            "classifier": RandomForestClassifier(random_state=42, n_jobs=-1),
-            "params": {
-                "classifier__n_estimators": [100, 200],
-                "classifier__max_depth": [None, 10],
-                "classifier__min_samples_split": [2, 5],
-            },
-        },
-        "Gradient Boosting": {
-            "classifier": GradientBoostingClassifier(random_state=42),
-            "params": {
-                "classifier__n_estimators": [100, 200],
-                "classifier__learning_rate": [0.05, 0.1],
-                "classifier__max_depth": [3, 5],
-            },
-        },
-    }
+    # Train the model on the training data
+    grid_search.fit(X_train, y_train)
 
-    results = []
-    best_model_name = None
-    best_model = None
-    best_f1 = -1
+    # Get the best fitted model from GridSearchCV
+    best_model = grid_search.best_estimator_
 
-    plt.figure(figsize=(7, 5))
+    # Make predictions on the unchanged test set
+    y_pred = best_model.predict(X_test)
+    y_probability = best_model.predict_proba(X_test)[:, 1]
 
-    for model_name, model_info in models.items():
-        print("\n=============================================")
-        print(f"Training model: {model_name}")
-        print("=============================================")
+    # Calculate evaluation metrics
+    accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall = recall_score(y_test, y_pred, zero_division=0)
+    f1 = f1_score(y_test, y_pred, zero_division=0)
+    roc_auc = roc_auc_score(y_test, y_probability)
 
-        # Pipeline:
-        # preprocessing -> SMOTE -> classifier
-        pipeline = Pipeline(
-            steps=[
-                ("preprocessor", preprocessor),
-                ("smote", SMOTE(random_state=42)),
-                ("classifier", model_info["classifier"]),
-            ]
-        )
+    # Store results for comparison
+    results.append(
+        {
+            "Model": model_name,
+            "Best CV F1": grid_search.best_score_,
+            "Accuracy": accuracy,
+            "Precision": precision,
+            "Recall": recall,
+            "F1-score": f1,
+            "ROC-AUC": roc_auc,
+            "Best Parameters": grid_search.best_params_,
+        }
+    )
 
-        grid_search = GridSearchCV(
-            estimator=pipeline,
-            param_grid=model_info["params"],
-            scoring="f1",
-            cv=cv,
-            n_jobs=-1,
-            verbose=1,
-        )
+    trained_models[model_name] = best_model
 
-        # Train model using GridSearchCV
-        grid_search.fit(X_train, y_train)
+    # Save classification report for this model
+    report = classification_report(
+        y_test,
+        y_pred,
+        output_dict=True,
+        zero_division=0,
+    )
 
-        print("\nBest parameters:")
-        print(grid_search.best_params_)
+    report_df = pd.DataFrame(report).transpose()
+    safe_model_name = model_name.lower().replace(" ", "_")
+    report_df.to_csv(REPORTS_DIR / f"classification_report_{safe_model_name}.csv")
 
-        print("\nBest cross-validation F1-score:")
-        print(round(grid_search.best_score_, 4))
+    # Create and save confusion matrix chart
+    cm = confusion_matrix(y_test, y_pred)
 
-        trained_model = grid_search.best_estimator_
-
-        # Test set prediction
-        y_pred = trained_model.predict(X_test)
-        y_proba = trained_model.predict_proba(X_test)[:, 1]
-
-        # Metrics
-        accuracy = accuracy_score(y_test, y_pred)
-        precision = precision_score(y_test, y_pred, zero_division=0)
-        recall = recall_score(y_test, y_pred, zero_division=0)
-        f1 = f1_score(y_test, y_pred, zero_division=0)
-        roc_auc = roc_auc_score(y_test, y_proba)
-
-        print("\nTest set results:")
-        print("Accuracy:", round(accuracy, 4))
-        print("Precision:", round(precision, 4))
-        print("Recall:", round(recall, 4))
-        print("F1-score:", round(f1, 4))
-        print("ROC-AUC:", round(roc_auc, 4))
-
-        print("\nClassification report:")
-        print(classification_report(y_test, y_pred, zero_division=0))
-
-        # Confusion matrix
-        cm = confusion_matrix(y_test, y_pred)
-
-        disp = ConfusionMatrixDisplay(
-            confusion_matrix=cm,
-            display_labels=["No Failure", "Failure"],
-        )
-        disp.plot()
-        plt.title(f"Confusion Matrix - {model_name}")
-        plt.tight_layout()
-
-        safe_model_name = model_name.lower().replace(" ", "_")
-        plt.savefig(FIGURES_DIR / f"confusion_matrix_{safe_model_name}.png")
-        plt.close()
-
-        # ROC curve
-        RocCurveDisplay.from_estimator(trained_model, X_test, y_test, name=model_name)
-
-        # Save classification report
-        report_dict = classification_report(
-            y_test,
-            y_pred,
-            output_dict=True,
-            zero_division=0,
-        )
-        report_df = pd.DataFrame(report_dict).transpose()
-        report_df.to_csv(REPORTS_DIR / f"classification_report_{safe_model_name}.csv")
-
-        # Store results
-        results.append(
-            {
-                "Model": model_name,
-                "Best CV F1-score": round(grid_search.best_score_, 4),
-                "Accuracy": round(accuracy, 4),
-                "Precision": round(precision, 4),
-                "Recall": round(recall, 4),
-                "F1-score": round(f1, 4),
-                "ROC-AUC": round(roc_auc, 4),
-                "Best Parameters": grid_search.best_params_,
-            }
-        )
-
-        # Select best model based on test F1-score
-        if f1 > best_f1:
-            best_f1 = f1
-            best_model_name = model_name
-            best_model = trained_model
-
-    # Save ROC curve figure for all models
-    plt.title("ROC Curve Comparison")
+    plt.figure(figsize=(6, 4))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
+    plt.title(f"Confusion Matrix - {model_name}")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
     plt.tight_layout()
-    plt.savefig(FIGURES_DIR / "roc_curve_comparison.png")
+    plt.savefig(FIGURES_DIR / f"confusion_matrix_{safe_model_name}.png")
     plt.close()
 
-    # Save model comparison results
-    results_df = pd.DataFrame(results)
-    results_df.to_csv(REPORTS_DIR / "model_comparison_results.csv", index=False)
+    print(f"{model_name} completed.")
+    print(f"F1-score: {f1:.4f}")
+    print(f"ROC-AUC: {roc_auc:.4f}")
 
-    # Save best model
-    best_model_path = MODELS_DIR / "best_model.pkl"
-    joblib.dump(best_model, best_model_path)
+# Convert model results into a DataFrame
+results_df = pd.DataFrame(results)
 
-    # Save best model summary
-    summary_path = REPORTS_DIR / "best_model_summary.txt"
+# Save model comparison results
+results_df.to_csv(REPORTS_DIR / "model_comparison_results.csv", index=False)
 
-    with open(summary_path, "w", encoding="utf-8") as f:
-        f.write("MODEL TRAINING SUMMARY\n")
-        f.write("=============================\n\n")
+# Select the best model using test F1-score
+best_model_row = results_df.sort_values(by="F1-score", ascending=False).iloc[0]
+best_model_name = best_model_row["Model"]
+final_model = trained_models[best_model_name]
 
-        f.write("Models compared:\n")
-        f.write("- Logistic Regression\n")
-        f.write("- Random Forest\n")
-        f.write("- Gradient Boosting\n\n")
+# Save the best model for the Flask application
+joblib.dump(final_model, MODELS_DIR / "best_model.pkl")
 
-        f.write("Evaluation metrics:\n")
-        f.write("- Accuracy\n")
-        f.write("- Precision\n")
-        f.write("- Recall\n")
-        f.write("- F1-score\n")
-        f.write("- ROC-AUC\n\n")
+# Save a text summary of the best model
+with open(REPORTS_DIR / "best_model_summary.txt", "w", encoding="utf-8") as file:
+    file.write("BEST MODEL SUMMARY\n")
+    file.write("-" * 50 + "\n\n")
 
-        f.write("Train-test split:\n")
-        f.write("80% training and 20% testing with stratified sampling.\n\n")
+    file.write("Best model selected by test F1-score:\n")
+    file.write(f"{best_model_name}\n\n")
 
-        f.write("Class imbalance handling:\n")
-        f.write("SMOTE was applied only inside the training pipeline.\n")
-        f.write("The test set was not oversampled.\n\n")
+    file.write("Model comparison results:\n")
+    file.write(results_df.to_string(index=False))
+    file.write("\n\n")
 
-        f.write("Best model selected by test F1-score:\n")
-        f.write(f"{best_model_name}\n\n")
+# Save ROC curve comparison for all models
+plt.figure(figsize=(8, 6))
 
-        f.write("Model comparison results:\n")
-        f.write(results_df.to_string(index=False))
+for model_name, model in trained_models.items():
+    RocCurveDisplay.from_estimator(
+        model,
+        X_test,
+        y_test,
+        name=model_name,
+        ax=plt.gca(),
+    )
 
-    print("\n-----------------------------")
-    print("Model comparison saved at: reports/model_comparison_results.csv")
-    print("Best model summary saved at: reports/best_model_summary.txt")
-    print(f"Best model saved at: {best_model_path}")
-    print("Confusion matrices and ROC curve saved inside: reports/figures")
-    print("\nBest model:", best_model_name)
-    print("Best F1-score:", round(best_f1, 4))
+plt.title("ROC Curve Comparison")
+plt.tight_layout()
+plt.savefig(FIGURES_DIR / "roc_curve_comparison.png")
+plt.close()
 
+print("\nModel comparison results saved at:")
+print(REPORTS_DIR / "model_comparison_results.csv")
 
-if __name__ == "__main__":
-    main()
+print("\nBest model saved at:")
+print(MODELS_DIR / "best_model.pkl")
+
+print("\nBest model selected:")
+print(best_model_name)

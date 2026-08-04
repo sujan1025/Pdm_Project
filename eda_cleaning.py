@@ -1,214 +1,195 @@
+"""
+Exploratory Data Analysis and Basic Cleaning
+
+This file loads the AI4I 2020 dataset, checks the data quality,
+creates summary reports, saves basic charts, and creates a cleaned dataset.
+"""
+
 from pathlib import Path
-import pandas as pd
+
 import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
 
 
-# File paths
-DATA_PATH = Path("data/ai4i2020.csv")
-CLEANED_PATH = Path("data/ai4i2020_cleaned.csv")
-
+# Set project folders
+DATA_DIR = Path("data")
 REPORTS_DIR = Path("reports")
-FIGURES_DIR = Path("reports/figures")
+FIGURES_DIR = Path("figures")
 
+# Create folders if they do not already exist
 REPORTS_DIR.mkdir(exist_ok=True)
-FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+FIGURES_DIR.mkdir(exist_ok=True)
 
+# Set dataset path
+DATASET_PATH = DATA_DIR / "ai4i2020.csv"
 
-def write_section(file, title):
-    file.write("\n" + "=" * 60 + "\n")
-    file.write(title + "\n")
-    file.write("=" * 60 + "\n")
+# Load the original dataset
+df = pd.read_csv(DATASET_PATH)
 
+# Display the first few rows to understand the dataset structure
+print("\nFirst 5 rows:")
+print(df.head())
 
-def main():
-    # Check dataset exists
-    if not DATA_PATH.exists():
-        print("ERROR: Dataset not found.")
-        print(DATA_PATH)
-        return
+# Check number of rows and columns
+print("\nDataset shape:")
+print(df.shape)
 
-    # Load dataset
-    df = pd.read_csv(DATA_PATH)
+# Check data types of each column
+print("\nData types:")
+print(df.dtypes)
 
-    # Columns used for EDA
-    numerical_columns = [
-        "Air temperature [K]",
-        "Process temperature [K]",
-        "Rotational speed [rpm]",
-        "Torque [Nm]",
-        "Tool wear [min]",
-    ]
+# Check missing values in each column
+missing_values = df.isnull().sum()
+print("\nMissing values:")
+print(missing_values)
 
-    failure_mode_columns = ["TWF", "HDF", "PWF", "OSF", "RNF"]
+# Check duplicate rows
+duplicate_count = df.duplicated().sum()
+print("\nDuplicate rows:")
+print(duplicate_count)
 
-    summary_path = REPORTS_DIR / "eda_summary.txt"
+# Check target class distribution
+target_counts = df["Machine failure"].value_counts()
+target_percentages = df["Machine failure"].value_counts(normalize=True) * 100
 
-    # ==============================
-    # EDA summary text file
-    # ==============================
-    with open(summary_path, "w", encoding="utf-8") as f:
-        write_section(f, "1. FIRST 5 ROWS")
-        f.write(df.head().to_string())
+print("\nMachine failure distribution:")
+print(target_counts)
+print(target_percentages)
 
-        write_section(f, "2. DATASET SHAPE")
-        f.write(f"Rows: {df.shape[0]}\n")
-        f.write(f"Columns: {df.shape[1]}\n")
+# Check product type distribution
+type_counts = df["Type"].value_counts()
+print("\nProduct type distribution:")
+print(type_counts)
 
-        write_section(f, "3. COLUMN NAMES")
-        for column in df.columns:
-            f.write(f"{column}\n")
+# Check failure mode counts
+failure_mode_columns = ["TWF", "HDF", "PWF", "OSF", "RNF"]
+failure_mode_counts = df[failure_mode_columns].sum()
 
-        write_section(f, "4. DATA TYPES")
-        f.write(df.dtypes.to_string())
+print("\nFailure mode counts:")
+print(failure_mode_counts)
 
-        write_section(f, "5. MISSING VALUES")
-        f.write(df.isnull().sum().to_string())
+# Create numerical summary for sensor and operating features
+numerical_summary = df.describe()
+print("\nNumerical summary:")
+print(numerical_summary)
 
-        write_section(f, "6. DUPLICATE ROWS")
-        f.write(f"Duplicate rows: {df.duplicated().sum()}\n")
+# Save first 20 rows for report evidence
+df.head(20).to_csv(REPORTS_DIR / "dataset_first_20_rows.csv", index=False)
 
-        write_section(f, "7. MACHINE FAILURE DISTRIBUTION")
-        failure_counts = df["Machine failure"].value_counts().sort_index()
-        failure_percentages = (
-            df["Machine failure"].value_counts(normalize=True).sort_index() * 100
-        ).round(2)
+# Save numerical summary
+numerical_summary.to_csv(REPORTS_DIR / "numerical_summary.csv")
 
-        f.write("Counts:\n")
-        f.write(failure_counts.to_string())
-        f.write("\n\nPercentages:\n")
-        f.write(failure_percentages.to_string())
-        f.write("\n\nMeaning:\n")
-        f.write("0 = No machine failure\n")
-        f.write("1 = Machine failure occurred\n")
+# Save target distribution
+target_counts.to_csv(REPORTS_DIR / "machine_failure_counts.csv")
 
-        write_section(f, "8. PRODUCT TYPE DISTRIBUTION")
-        product_type_counts = df["Type"].value_counts()
-        f.write(product_type_counts.to_string())
+# Save product type distribution
+type_counts.to_csv(REPORTS_DIR / "product_type_counts.csv")
 
-        write_section(f, "9. FAILURE MODE COUNTS")
-        failure_mode_counts = df[failure_mode_columns].sum()
-        f.write(failure_mode_counts.to_string())
+# Save failure mode counts
+failure_mode_counts.to_csv(REPORTS_DIR / "failure_mode_counts.csv")
 
-        write_section(f, "10. NUMERICAL SUMMARY")
-        numerical_summary = df[numerical_columns].describe()
-        f.write(numerical_summary.to_string())
+# Save EDA summary into a text file
+with open(REPORTS_DIR / "eda_summary.txt", "w", encoding="utf-8") as file:
+    file.write("EDA AND CLEANING SUMMARY\n")
+    file.write("-" * 50 + "\n\n")
 
-        write_section(f, "11. BASIC CLEANING DECISION")
+    file.write(f"Dataset shape: {df.shape}\n\n")
 
-        original_rows = df.shape[0]
+    file.write("Missing values:\n")
+    file.write(str(missing_values))
+    file.write("\n\n")
 
-        # Cleaning starts after EDA checks
-        df_cleaned = df.copy()
+    file.write(f"Duplicate rows: {duplicate_count}\n\n")
 
-        before_duplicates = df_cleaned.shape[0]
-        df_cleaned = df_cleaned.drop_duplicates()
-        removed_duplicates = before_duplicates - df_cleaned.shape[0]
+    file.write("Machine failure distribution:\n")
+    file.write(str(target_counts))
+    file.write("\n\n")
 
-        before_missing = df_cleaned.shape[0]
-        df_cleaned = df_cleaned.dropna()
-        removed_missing = before_missing - df_cleaned.shape[0]
+    file.write("Machine failure percentages:\n")
+    file.write(str(target_percentages))
+    file.write("\n\n")
 
-        # Remove non-predictive identifier columns
-        identifier_columns = ["UDI", "Product ID"]
-        df_cleaned = df_cleaned.drop(columns=identifier_columns)
+    file.write("Product type distribution:\n")
+    file.write(str(type_counts))
+    file.write("\n\n")
 
-        f.write(f"Original rows: {original_rows}\n")
-        f.write(f"Removed duplicate rows: {removed_duplicates}\n")
-        f.write(f"Removed rows with missing values: {removed_missing}\n")
-        f.write("Removed identifier columns: UDI, Product ID\n")
-        f.write(f"Cleaned dataset shape: {df_cleaned.shape}\n")
+    file.write("Failure mode counts:\n")
+    file.write(str(failure_mode_counts))
+    file.write("\n\n")
 
-        f.write("\nCleaning explanation:\n")
-        f.write(
-            "No missing values or duplicate rows were found. Therefore, no records were removed. "
-            "Only UDI and Product ID were removed because they are identifier columns and do not "
-            "represent machine operating behaviour.\n"
-        )
+# Create histogram charts for numerical columns
+numerical_columns = [
+    "Air temperature [K]",
+    "Process temperature [K]",
+    "Rotational speed [rpm]",
+    "Torque [Nm]",
+    "Tool wear [min]",
+]
 
-    # ==============================
-    # Save CSV report outputs
-    # ==============================
-    df.head(20).to_csv(REPORTS_DIR / "dataset_first_20_rows.csv", index=False)
-    numerical_summary.to_csv(REPORTS_DIR / "numerical_summary.csv")
-    failure_counts.to_csv(REPORTS_DIR / "machine_failure_counts.csv")
-    product_type_counts.to_csv(REPORTS_DIR / "product_type_counts.csv")
-    failure_mode_counts.to_csv(REPORTS_DIR / "failure_mode_counts.csv")
+for column in numerical_columns:
+    # Clean the column name so it can be used as a file name
+    file_name = (
+        column.replace("[", "")
+        .replace("]", "")
+        .replace(" ", "_")
+        .replace("/", "_")
+    )
 
-    # Save cleaned dataset
-    df_cleaned.to_csv(CLEANED_PATH, index=False)
-
-    # ==============================
-    # EDA visualisations
-    # ==============================
-
-    # Chart 1: Machine failure distribution
-    plt.figure(figsize=(6, 4))
-    failure_counts.plot(kind="bar")
-    plt.title("Machine Failure Distribution")
-    plt.xlabel("Machine Failure")
-    plt.ylabel("Number of Records")
-    plt.xticks(ticks=[0, 1], labels=["No Failure (0)", "Failure (1)"], rotation=0)
+    # Create a histogram to show the distribution of the feature
+    plt.figure(figsize=(8, 5))
+    sns.histplot(df[column], kde=True)
+    plt.title(f"Distribution of {column}")
+    plt.xlabel(column)
+    plt.ylabel("Count")
     plt.tight_layout()
-    plt.savefig(FIGURES_DIR / "machine_failure_distribution.png")
+    plt.savefig(FIGURES_DIR / f"{file_name}_histogram.png")
     plt.close()
 
-    # Chart 2: Product type distribution
-    plt.figure(figsize=(6, 4))
-    product_type_counts.plot(kind="bar")
-    plt.title("Product Type Distribution")
-    plt.xlabel("Product Type")
-    plt.ylabel("Number of Records")
-    plt.xticks(rotation=0)
-    plt.tight_layout()
-    plt.savefig(FIGURES_DIR / "product_type_distribution.png")
-    plt.close()
+# Create target distribution chart
+plt.figure(figsize=(6, 4))
+sns.countplot(x="Machine failure", data=df)
+plt.title("Machine Failure Distribution")
+plt.xlabel("Machine Failure")
+plt.ylabel("Count")
+plt.tight_layout()
+plt.savefig(FIGURES_DIR / "machine_failure_distribution.png")
+plt.close()
 
-    # Chart 3: Failure mode counts
-    plt.figure(figsize=(6, 4))
-    failure_mode_counts.plot(kind="bar")
-    plt.title("Failure Mode Counts")
-    plt.xlabel("Failure Mode")
-    plt.ylabel("Number of Failures")
-    plt.xticks(rotation=0)
-    plt.tight_layout()
-    plt.savefig(FIGURES_DIR / "failure_mode_counts.png")
-    plt.close()
+# Create product type distribution chart
+plt.figure(figsize=(6, 4))
+sns.countplot(x="Type", data=df)
+plt.title("Product Type Distribution")
+plt.xlabel("Product Type")
+plt.ylabel("Count")
+plt.tight_layout()
+plt.savefig(FIGURES_DIR / "product_type_distribution.png")
+plt.close()
 
-    # Chart 4: Numerical feature histograms
-    for col in numerical_columns:
-        plt.figure(figsize=(6, 4))
-        df[col].hist(bins=30)
-        plt.title(f"Distribution of {col}")
-        plt.xlabel(col)
-        plt.ylabel("Frequency")
-        plt.tight_layout()
+# Create failure mode count chart
+plt.figure(figsize=(7, 4))
+failure_mode_counts.plot(kind="bar")
+plt.title("Failure Mode Counts")
+plt.xlabel("Failure Mode")
+plt.ylabel("Count")
+plt.tight_layout()
+plt.savefig(FIGURES_DIR / "failure_mode_counts.png")
+plt.close()
 
-        file_name = (
-            col.replace(" ", "_")
-            .replace("[", "")
-            .replace("]", "")
-            .replace("/", "_")
-        )
+# Remove duplicate rows if any exist
+df_cleaned = df.drop_duplicates()
 
-        plt.savefig(FIGURES_DIR / f"{file_name}_histogram.png")
-        plt.close()
+# Remove rows with missing values if any exist
+df_cleaned = df_cleaned.dropna()
 
-    # ==============================
-    # Console output
-    # ==============================
-    print("\nEDA AND BASIC CLEANING COMPLETED SUCCESSFULLY")
-    print("----------------------------------------------------")
-    print(f"Original dataset shape: {df.shape}")
-    print(f"Cleaned dataset shape: {df_cleaned.shape}")
-    print(f"Cleaned dataset saved at: {CLEANED_PATH}")
-    print(f"EDA summary saved at: {summary_path}")
-    print("CSV reports saved inside: reports")
-    print("Charts saved inside: reports/figures")
-    print("\nMachine failure distribution:")
-    print(failure_counts)
-    print("\nMachine failure percentage:")
-    print(failure_percentages)
+# Remove identifier columns because they do not describe machine behaviour
+df_cleaned = df_cleaned.drop(columns=["UDI", "Product ID"])
 
+# Save the cleaned dataset for preprocessing and model training
+cleaned_path = DATA_DIR / "ai4i2020_cleaned.csv"
+df_cleaned.to_csv(cleaned_path, index=False)
 
-if __name__ == "__main__":
-    main()
+print("\nCleaned dataset saved at:")
+print(cleaned_path)
+
+print("\nSTEP 2: EDA AND CLEANING COMPLETED")
