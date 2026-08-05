@@ -1,41 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Machine Failure Prediction</title>
+    <title>Machine Failure Risk Assessment | Predictive Maintenance DSS</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
     <nav class="navbar">
-        <div class="nav-brand">Predictive Maintenance DSS</div>
+        <div class="nav-brand">
+            <span class="brand-mark">PM</span>
+            Predictive Maintenance DSS
+        </div>
+
         <div class="nav-links">
             <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('main.predict') }}">Prediction</a>
-            <a href="{{ url_for('main.history') }}">History</a>
-            <a href="{{ url_for('main.logout') }}">Logout</a>       
+            <a href="{{ url_for('main.predict') }}">Risk Analysis</a>
+            <a href="{{ url_for('main.history') }}">Reports</a>
+
+            {% if current_user.role == "admin" %}
+                <a href="{{ url_for('main.users') }}">Users</a>
+            {% endif %}
+
+            <a class="logout-link" href="{{ url_for('main.logout') }}">Logout</a>
         </div>
     </nav>
 
     <main class="container">
 
         <div class="page-header">
-            <p class="eyebrow">Prediction Module</p>
-            <h1>Machine Failure Risk Prediction</h1>
+            <p class="eyebrow">Asset Risk Analysis</p>
+            <h1>Machine Failure Risk Assessment</h1>
             <p>
-                Enter machine operating conditions below. The system will estimate failure risk
-                using the trained Gradient Boosting model.
+                Enter live or recorded machine operating conditions to generate an
+                instant failure risk score and maintenance recommendation.
             </p>
         </div>
 
         {% if error %}
             <div class="alert-error">
-                <strong>Prediction Error:</strong> {{ error }}
+                <strong>Assessment Error:</strong> {{ error }}
             </div>
         {% endif %}
 
         <div class="form-layout">
             <form method="POST" class="business-form">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">  
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
                 <div class="form-section">
                     <h2>Machine Information</h2>
@@ -67,25 +76,28 @@
                     <input type="number" step="1" name="tool_wear" placeholder="Example: 0" required>
                 </div>
 
-                <button type="submit" class="button primary full-width">Predict Failure Risk</button>
+                <button type="submit" class="button primary full-width">
+                    Generate Risk Assessment
+                </button>
             </form>
 
             <aside class="side-panel">
-                <h2>Input Guidance</h2>
+                <h2>Operating Range Guidance</h2>
                 <p>
-                    Use realistic machine operating values from the AI4I predictive maintenance dataset range.
+                    Use realistic operating values within the observed dataset range.
                 </p>
 
                 <ul>
-                    <li><strong>Air temperature:</strong> around 295–305 K</li>
-                    <li><strong>Process temperature:</strong> around 305–314 K</li>
-                    <li><strong>Rotational speed:</strong> around 1168–2886 rpm</li>
-                    <li><strong>Torque:</strong> around 3.8–76.6 Nm</li>
-                    <li><strong>Tool wear:</strong> around 0–253 min</li>
+                    <li><strong>Air temperature:</strong> 295.3–304.5 K</li>
+                    <li><strong>Process temperature:</strong> 305.7–313.8 K</li>
+                    <li><strong>Rotational speed:</strong> 1168–2886 rpm</li>
+                    <li><strong>Torque:</strong> 3.8–76.6 Nm</li>
+                    <li><strong>Tool wear:</strong> 0–253 min</li>
                 </ul>
 
                 <div class="note-box">
-                    <strong>Note:</strong> This system is a decision support tool. Final maintenance decisions should be reviewed by an engineer.
+                    <strong>Operational Note:</strong> This system supports maintenance
+                    decisions. Final action should be reviewed by an engineer.
                 </div>
             </aside>
         </div>
@@ -93,7 +105,7 @@
     </main>
 
     <footer>
-        <p>MSc Computer Science Project | Predictive Maintenance Decision Support System</p>
+        <p>© 2026 Predictive Maintenance Decision Support System | Industrial Asset Risk Monitoring Platform</p>
     </footer>
 
 </body>

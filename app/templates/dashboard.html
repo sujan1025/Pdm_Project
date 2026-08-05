@@ -1,109 +1,143 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard | Predictive Maintenance DSS</title>
+    <title>Operations Dashboard | Predictive Maintenance DSS</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
     <nav class="navbar">
-        <div class="nav-brand">Predictive Maintenance DSS</div>
+        <div class="nav-brand">
+            <span class="brand-mark">PM</span>
+            Predictive Maintenance DSS
+        </div>
+
         <div class="nav-links">
             <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('main.predict') }}">Prediction</a>
-            <a href="{{ url_for('main.history') }}">History</a>
+            <a href="{{ url_for('main.predict') }}">Risk Analysis</a>
+            <a href="{{ url_for('main.history') }}">Reports</a>
 
             {% if current_user.role == "admin" %}
                 <a href="{{ url_for('main.users') }}">Users</a>
             {% endif %}
 
-            <a href="{{ url_for('main.logout') }}">Logout</a>
+            <a class="logout-link" href="{{ url_for('main.logout') }}">Logout</a>
         </div>
     </nav>
 
-    <section class="hero">
-        <div class="hero-content">
-            <p class="eyebrow">Secure Machine Learning Decision Support System</p>
-            <h1>Early Machine Failure Detection for Predictive Maintenance</h1>
+    <section class="business-hero">
+        <div class="hero-left">
+            <p class="eyebrow">Industrial Asset Risk Monitoring</p>
+
+            <h1>Predict machine failure risk before downtime occurs.</h1>
+
             <p class="hero-text">
-                A secure decision support prototype that predicts machine failure risk using
-                operational sensor values and provides maintenance recommendations for engineers.
+                The Predictive Maintenance Decision Support System helps engineering and
+                maintenance teams assess machine failure risk, review operating conditions,
+                and support maintenance planning using machine learning-based risk analysis.
             </p>
 
             <div class="hero-actions">
-                <a class="button primary" href="{{ url_for('main.predict') }}">Start Prediction</a>
-                <a class="button secondary" href="{{ url_for('main.history') }}">View History</a>
+                <a class="button primary" href="{{ url_for('main.predict') }}">Run Risk Analysis</a>
+                <a class="button secondary" href="{{ url_for('main.history') }}">View Reports</a>
+            </div>
+        </div>
+
+        <div class="hero-panel">
+            <p class="panel-label">Platform Status</p>
+            <h2>Operational</h2>
+            <p>
+                Model service, user access, risk scoring and reporting modules are active.
+            </p>
+
+            <div class="status-list">
+                <div><span class="status-dot"></span>ML prediction engine online</div>
+                <div><span class="status-dot"></span>Secure access enabled</div>
+                <div><span class="status-dot"></span>Assessment history active</div>
             </div>
         </div>
     </section>
 
-    <main class="container" id="overview">
+    <main class="container">
 
         <div class="section-title">
-            <h2>System Overview</h2>
+            <h2>Operations Overview</h2>
             <p>
-                The system combines machine learning prediction with secure authentication,
-                role-based access control, and prediction history.
+                Review prediction activity, access level and recent machine risk assessments.
             </p>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card">
+                <span class="stat-label">Total Assessments</span>
                 <h3>{{ total_predictions }}</h3>
-                <p>Total predictions recorded</p>
+                <p>Risk assessments recorded</p>
             </div>
 
             <div class="stat-card">
+                <span class="stat-label">Access Level</span>
                 <h3>{{ current_user.role|capitalize }}</h3>
-                <p>Current user role</p>
+                <p>Current permission level</p>
             </div>
 
             <div class="stat-card">
+                <span class="stat-label">Active User</span>
                 <h3>{{ current_user.username }}</h3>
-                <p>Logged-in user</p>
+                <p>Authenticated account</p>
             </div>
 
             <div class="stat-card">
-                <h3>Secure</h3>
-                <p>Login and CSRF enabled</p>
+                <span class="stat-label">Security</span>
+                <h3>Enabled</h3>
+                <p>Login, CSRF and role access</p>
             </div>
         </div>
 
         <div class="card-grid">
             <div class="info-card">
-                <h3>Failure Prediction</h3>
+                <div class="card-icon">01</div>
+                <h3>Failure Risk Scoring</h3>
                 <p>
-                    Predicts whether a machine is likely to fail based on product type,
-                    air temperature, process temperature, rotational speed, torque, and tool wear.
+                    Analyse operating values and generate a probability-based failure risk
+                    assessment for maintenance planning.
                 </p>
             </div>
 
             <div class="info-card">
-                <h3>Decision Support Output</h3>
+                <div class="card-icon">02</div>
+                <h3>Maintenance Decision Support</h3>
                 <p>
-                    Provides a clear prediction result, failure probability score, and
-                    maintenance recommendation to support engineering decisions.
+                    Convert model output into clear status messages and maintenance
+                    recommendations for operational teams.
                 </p>
             </div>
 
             <div class="info-card">
-                <h3>Security Features</h3>
+                <div class="card-icon">03</div>
+                <h3>Operational Traceability</h3>
                 <p>
-                    Includes secure login, password hashing, Flask-Login session management,
-                    CSRF protection, role-based access control, and prediction history.
+                    Store assessment records securely to support review, accountability
+                    and future maintenance analysis.
                 </p>
             </div>
         </div>
 
         <div class="info-card">
-            <h3>Recent Predictions</h3>
+            <div class="table-header">
+                <div>
+                    <h3>Recent Risk Assessments</h3>
+                    <p>Latest machine failure assessments recorded in the system.</p>
+                </div>
+
+                <a class="button small secondary" href="{{ url_for('main.history') }}">View All</a>
+            </div>
 
             {% if recent_predictions %}
                 <table>
                     <tr>
                         <th>Date</th>
                         <th>Machine Type</th>
-                        <th>Prediction</th>
+                        <th>Risk Output</th>
                         <th>Failure Probability</th>
                         <th>Status</th>
                     </tr>
@@ -112,30 +146,42 @@
                     <tr>
                         <td>{{ record.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
                         <td>{{ record.machine_type }}</td>
-                        <td>{{ record.prediction }}</td>
+                        <td>
+                            {% if record.prediction == 1 %}
+                                <span class="badge danger">Failure Risk</span>
+                            {% else %}
+                                <span class="badge success">Normal</span>
+                            {% endif %}
+                        </td>
                         <td>{{ record.failure_probability }}%</td>
                         <td>{{ record.status }}</td>
                     </tr>
                     {% endfor %}
                 </table>
             {% else %}
-                <p>No prediction history yet. Start by making a machine failure prediction.</p>
+                <div class="empty-state">
+                    <h3>No assessments recorded yet</h3>
+                    <p>Run your first machine risk analysis to populate the dashboard.</p>
+                    <a class="button primary" href="{{ url_for('main.predict') }}">Run First Analysis</a>
+                </div>
             {% endif %}
         </div>
 
         <div class="cta-panel">
             <div>
-                <h2>Ready to assess a machine?</h2>
-                <p>Enter the operating values and receive an instant risk prediction.</p>
+                <h2>Start a new machine risk assessment</h2>
+                <p>
+                    Enter operating values and receive an instant machine failure risk score.
+                </p>
             </div>
 
-            <a class="button primary" href="{{ url_for('main.predict') }}">Go to Prediction Page</a>
+            <a class="button primary" href="{{ url_for('main.predict') }}">Launch Risk Analysis</a>
         </div>
 
     </main>
 
     <footer>
-        <p>MSc Computer Science Project | Predictive Maintenance Decision Support System</p>
+        <p>© 2026 Predictive Maintenance Decision Support System | Industrial Asset Risk Monitoring Platform</p>
     </footer>
 
 </body>

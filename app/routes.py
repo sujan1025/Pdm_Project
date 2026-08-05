@@ -2,7 +2,7 @@
 Flask Routes
 
 This file controls the web pages of the application, including login,
-dashboard, prediction, history, and admin user management.
+dashboard, prediction, history reporting, and admin user management.
 """
 
 from functools import wraps
@@ -259,7 +259,7 @@ def predict():
 @login_required
 def history():
     """
-    Show prediction history records.
+    Show prediction history with graph-based reporting.
     """
 
     # Admin users can see all prediction records
@@ -279,8 +279,82 @@ def history():
             .all()
         )
 
-    # Send records to the history page
-    return render_template("history.html", records=records)
+    # Count total prediction records
+    total_records = len(records)
+
+    # Count records where the model predicted failure risk
+    failure_records = sum(1 for record in records if record.prediction == 1)
+
+    # Count records where the model predicted normal machine condition
+    normal_records = total_records - failure_records
+
+    # Calculate summary values for reporting cards and chart bars
+    if total_records > 0:
+        normal_percentage = round((normal_records / total_records) * 100, 2)
+        failure_percentage = round((failure_records / total_records) * 100, 2)
+
+        average_probability = round(
+            sum(record.failure_probability for record in records) / total_records,
+            2,
+        )
+
+        highest_probability = round(
+            max(record.failure_probability for record in records),
+            2,
+        )
+    else:
+        normal_percentage = 0
+        failure_percentage = 0
+        average_probability = 0
+        highest_probability = 0
+
+    # Use the latest 10 records for the probability trend graph
+    # Records are reversed so the graph displays oldest to newest
+    recent_for_chart = list(reversed(records[:10]))
+
+    trend_points = []
+    point_count = len(recent_for_chart)
+
+    # Convert probability values into SVG coordinates
+    for index, record in enumerate(recent_for_chart):
+        # Calculate x-axis position
+        if point_count == 1:
+            x_position = 50
+        else:
+            x_position = (index / (point_count - 1)) * 100
+
+        # SVG y-axis starts from the top
+        # Therefore, higher probability should appear higher on the graph
+        y_position = 100 - max(0, min(record.failure_probability, 100))
+
+        trend_points.append(
+            {
+                "x": round(x_position, 2),
+                "y": round(y_position, 2),
+                "probability": round(record.failure_probability, 2),
+                "label": record.created_at.strftime("%d %b %H:%M"),
+            }
+        )
+
+    # Create SVG polyline points for the trend graph
+    svg_points = " ".join(
+        f"{point['x']},{point['y']}" for point in trend_points
+    )
+
+    # Send history records and graph values to the history page
+    return render_template(
+        "history.html",
+        records=records,
+        total_records=total_records,
+        failure_records=failure_records,
+        normal_records=normal_records,
+        normal_percentage=normal_percentage,
+        failure_percentage=failure_percentage,
+        average_probability=average_probability,
+        highest_probability=highest_probability,
+        trend_points=trend_points,
+        svg_points=svg_points,
+    )
 
 
 @main.route("/admin/users")

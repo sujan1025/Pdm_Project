@@ -1,128 +1,239 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Prediction History | Predictive Maintenance DSS</title>
+    <title>Risk Assessment Reports | Predictive Maintenance DSS</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
     <nav class="navbar">
-        <div class="nav-brand">Predictive Maintenance DSS</div>
+        <div class="nav-brand">
+            <span class="brand-mark">PM</span>
+            Predictive Maintenance DSS
+        </div>
+
         <div class="nav-links">
             <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('main.predict') }}">Prediction</a>
-            <a href="{{ url_for('main.history') }}">History</a>
+            <a href="{{ url_for('main.predict') }}">Risk Analysis</a>
+            <a href="{{ url_for('main.history') }}">Reports</a>
 
             {% if current_user.role == "admin" %}
                 <a href="{{ url_for('main.users') }}">Users</a>
             {% endif %}
 
-            <a href="{{ url_for('main.logout') }}">Logout</a>
+            <a class="logout-link" href="{{ url_for('main.logout') }}">Logout</a>
         </div>
     </nav>
 
     <main class="container">
 
         <div class="page-header">
-            <p class="eyebrow">Audit Trail</p>
-            <h1>Prediction History</h1>
+            <p class="eyebrow">Operational Reports</p>
+            <h1>Risk Assessment History</h1>
             <p>
-                This page stores previous machine failure predictions for review,
-                accountability, and decision-support traceability.
+                Review machine failure risk activity using visual summaries,
+                probability trends and recent assessment records.
             </p>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card">
-                <h3>{{ records|length }}</h3>
-                <p>Prediction records shown</p>
+                <span class="stat-label">Total Assessments</span>
+                <h3>{{ total_records }}</h3>
+                <p>Records stored in the system</p>
             </div>
 
             <div class="stat-card">
-                <h3>{{ current_user.role|capitalize }}</h3>
-                <p>Current user role</p>
+                <span class="stat-label">Failure Risk</span>
+                <h3>{{ failure_records }}</h3>
+                <p>Assessments flagged as risk</p>
             </div>
 
             <div class="stat-card">
-                <h3>{{ current_user.username }}</h3>
-                <p>Logged-in user</p>
+                <span class="stat-label">Normal Output</span>
+                <h3>{{ normal_records }}</h3>
+                <p>Assessments marked as normal</p>
             </div>
 
             <div class="stat-card">
-                <h3>Audit</h3>
-                <p>Prediction history enabled</p>
+                <span class="stat-label">Average Probability</span>
+                <h3>{{ average_probability }}%</h3>
+                <p>Average failure probability</p>
             </div>
         </div>
 
+        <div class="history-visual-grid">
+
+            <div class="chart-card">
+                <div class="table-header">
+                    <div>
+                        <h3>Risk Outcome Distribution</h3>
+                        <p>Comparison of normal and failure-risk assessments.</p>
+                    </div>
+                </div>
+
+                {% if total_records > 0 %}
+                    <div class="risk-bars">
+
+                        <div class="risk-row">
+                            <div class="risk-row-header">
+                                <span>Normal assessments</span>
+                                <strong>{{ normal_records }} records</strong>
+                            </div>
+
+                            <div class="bar-track">
+                                <div class="bar-fill normal" style="width: {{ normal_percentage }}%;"></div>
+                            </div>
+
+                            <p class="bar-caption">{{ normal_percentage }}% of total assessments</p>
+                        </div>
+
+                        <div class="risk-row">
+                            <div class="risk-row-header">
+                                <span>Failure-risk assessments</span>
+                                <strong>{{ failure_records }} records</strong>
+                            </div>
+
+                            <div class="bar-track">
+                                <div class="bar-fill failure" style="width: {{ failure_percentage }}%;"></div>
+                            </div>
+
+                            <p class="bar-caption">{{ failure_percentage }}% of total assessments</p>
+                        </div>
+
+                    </div>
+
+                    <div class="chart-note">
+                        Highest recorded failure probability: <strong>{{ highest_probability }}%</strong>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <h3>No assessment records yet</h3>
+                        <p>Run a machine risk analysis to generate reporting data.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="chart-card">
+                <div class="table-header">
+                    <div>
+                        <h3>Failure Probability Trend</h3>
+                        <p>Recent assessment probability movement, oldest to newest.</p>
+                    </div>
+                </div>
+
+                {% if trend_points %}
+                    <div class="trend-chart-wrap">
+                        <div class="trend-y-label top">100%</div>
+                        <div class="trend-y-label middle">50%</div>
+                        <div class="trend-y-label bottom">0%</div>
+
+                        <svg class="trend-chart" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <line x1="0" y1="0" x2="100" y2="0" class="trend-grid"></line>
+                            <line x1="0" y1="50" x2="100" y2="50" class="trend-grid"></line>
+                            <line x1="0" y1="100" x2="100" y2="100" class="trend-grid"></line>
+
+                            <polyline
+                                points="{{ svg_points }}"
+                                class="trend-line">
+                            </polyline>
+
+                            {% for point in trend_points %}
+                                <circle
+                                    class="trend-point"
+                                    cx="{{ point.x }}"
+                                    cy="{{ point.y }}"
+                                    r="2">
+                                </circle>
+                            {% endfor %}
+                        </svg>
+                    </div>
+
+                    <div class="trend-labels">
+                        {% for point in trend_points %}
+                            <div>
+                                <strong>{{ point.probability }}%</strong>
+                                <span>{{ point.label }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <h3>No trend data available</h3>
+                        <p>Prediction results will appear here after assessments are created.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+
         <div class="info-card">
-            <h3>Stored Prediction Records</h3>
+            <div class="table-header">
+                <div>
+                    <h3>Recent Assessment Records</h3>
+                    <p>Latest risk assessments displayed as report cards.</p>
+                </div>
+
+                <a class="button small secondary" href="{{ url_for('main.predict') }}">
+                    New Assessment
+                </a>
+            </div>
 
             {% if records %}
-                <table>
-                    <tr>
-                        <th>Date</th>
+                <div class="history-card-list">
+                    {% for record in records[:6] %}
+                        <div class="history-item">
+                            <div>
+                                <p class="record-date">
+                                    {{ record.created_at.strftime("%Y-%m-%d %H:%M") }}
+                                </p>
 
-                        {% if current_user.role == "admin" %}
-                            <th>User</th>
-                        {% endif %}
+                                <h3>Machine Type {{ record.machine_type }}</h3>
 
-                        <th>Machine Type</th>
-                        <th>Prediction</th>
-                        <th>Failure Probability</th>
-                        <th>Status</th>
-                        <th>Torque</th>
-                        <th>Tool Wear</th>
-                    </tr>
+                                <p>
+                                    Failure probability:
+                                    <strong>{{ record.failure_probability }}%</strong>
+                                </p>
+                            </div>
 
-                    {% for record in records %}
-                    <tr>
-                        <td>{{ record.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+                            <div class="record-status">
+                                {% if record.prediction == 1 %}
+                                    <span class="badge danger">Failure Risk</span>
+                                {% else %}
+                                    <span class="badge success">Normal</span>
+                                {% endif %}
 
-                        {% if current_user.role == "admin" %}
-                            <td>{{ record.user.username }}</td>
-                        {% endif %}
-
-                        <td>{{ record.machine_type }}</td>
-
-                        <td>
-                            {% if record.prediction == 1 %}
-                                1 - Failure Risk
-                            {% else %}
-                                0 - No Failure
-                            {% endif %}
-                        </td>
-
-                        <td>{{ record.failure_probability }}%</td>
-                        <td>{{ record.status }}</td>
-                        <td>{{ record.torque }}</td>
-                        <td>{{ record.tool_wear }}</td>
-                    </tr>
+                                <p>{{ record.status }}</p>
+                            </div>
+                        </div>
                     {% endfor %}
-                </table>
+                </div>
             {% else %}
-                <p>No prediction history has been recorded yet.</p>
-                <a class="button primary" href="{{ url_for('main.predict') }}">Make First Prediction</a>
+                <div class="empty-state">
+                    <h3>No recent records</h3>
+                    <p>Use the risk analysis page to create your first record.</p>
+                    <a class="button primary" href="{{ url_for('main.predict') }}">Run Risk Analysis</a>
+                </div>
             {% endif %}
         </div>
 
         <div class="cta-panel">
             <div>
-                <h2>Continue Analysis</h2>
+                <h2>Continue machine risk monitoring</h2>
                 <p>
-                    Make another prediction or return to the dashboard to review the system overview.
+                    Run another assessment to update the reporting dashboard and trend graph.
                 </p>
             </div>
 
-            <div>
-                <a class="button primary" href="{{ url_for('main.predict') }}">Make Prediction</a>
-                <a class="button secondary" href="{{ url_for('main.dashboard') }}">Back to Dashboard</a>
-            </div>
+            <a class="button primary" href="{{ url_for('main.predict') }}">
+                Run New Assessment
+            </a>
         </div>
 
     </main>
 
     <footer>
-        <p>MSc Computer Science Project | Predictive Maintenance Decision Support System</p>
+        <p>© 2026 Predictive Maintenance Decision Support System | Industrial Asset Risk Monitoring Platform</p>
     </footer>
 
 </body>

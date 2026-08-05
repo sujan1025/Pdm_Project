@@ -3,6 +3,23 @@ EDA AND CLEANING SUMMARY
 
 Dataset shape: (10000, 14)
 
+Data types:
+UDI                          int64
+Product ID                     str
+Type                           str
+Air temperature [K]        float64
+Process temperature [K]    float64
+Rotational speed [rpm]       int64
+Torque [Nm]                float64
+Tool wear [min]              int64
+Machine failure              int64
+TWF                          int64
+HDF                          int64
+PWF                          int64
+OSF                          int64
+RNF                          int64
+dtype: object
+
 Missing values:
 UDI                        0
 Product ID                 0
@@ -48,4 +65,26 @@ PWF     95
 OSF     98
 RNF     19
 dtype: int64
+
+Numerical summary:
+       Air temperature [K]  Process temperature [K]  Rotational speed [rpm]   Torque [Nm]  Tool wear [min]
+count         10000.000000             10000.000000            10000.000000  10000.000000     10000.000000
+mean            300.004930               310.005560             1538.776100     39.986910       107.951000
+std               2.000259                 1.483734              179.284096      9.968934        63.654147
+min             295.300000               305.700000             1168.000000      3.800000         0.000000
+25%             298.300000               308.800000             1423.000000     33.200000        53.000000
+50%             300.100000               310.100000             1503.000000     40.100000       108.000000
+75%             301.500000               311.100000             1612.000000     46.800000       162.000000
+max             304.500000               313.800000             2886.000000     76.600000       253.000000
+
+Outlier summary using IQR method:
+                Feature     Q1     Q3   IQR  Lower Bound  Upper Bound  Outlier Count  Outlier Percentage
+    Air temperature [K]  298.3  301.5   3.2       293.50       306.30              0                0.00
+Process temperature [K]  308.8  311.1   2.3       305.35       314.55              0                0.00
+ Rotational speed [rpm] 1423.0 1612.0 189.0      1139.50      1895.50            418                4.18
+            Torque [Nm]   33.2   46.8  13.6        12.80        67.20             69                0.69
+        Tool wear [min]   53.0  162.0 109.0      -110.50       325.50              0                0.00
+
+Outlier handling decision:
+Outliers were checked but not removed automatically because unusual machine operating values may represent real abnormal behaviour linked to machine failure risk.
 
