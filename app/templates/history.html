@@ -31,8 +31,8 @@
             <p class="eyebrow">Operational Reports</p>
             <h1>Risk Assessment History</h1>
             <p>
-                Review machine failure risk activity using visual summaries,
-                probability trends and recent assessment records.
+                Review machine failure risk activity using circular risk distribution,
+                probability trend and recent assessment records.
             </p>
         </div>
 
@@ -68,48 +68,54 @@
                 <div class="table-header">
                     <div>
                         <h3>Risk Outcome Distribution</h3>
-                        <p>Comparison of normal and failure-risk assessments.</p>
+                        <p>Failure-risk and normal assessment share shown as a circular graph.</p>
                     </div>
                 </div>
 
                 {% if total_records > 0 %}
-                    <div class="risk-bars">
+                    <div class="donut-layout">
 
-                        <div class="risk-row">
-                            <div class="risk-row-header">
-                                <span>Normal assessments</span>
-                                <strong>{{ normal_records }} records</strong>
+                        <div
+                            class="donut-chart"
+                            style="--normal-percent: {{ normal_percentage }}%;"
+                        >
+                            <div class="donut-center">
+                                <span>{{ failure_percentage }}%</span>
+                                <small>Failure Risk</small>
                             </div>
-
-                            <div class="bar-track">
-                                <div class="bar-fill normal" style="width: {{ normal_percentage }}%;"></div>
-                            </div>
-
-                            <p class="bar-caption">{{ normal_percentage }}% of total assessments</p>
                         </div>
 
-                        <div class="risk-row">
-                            <div class="risk-row-header">
-                                <span>Failure-risk assessments</span>
-                                <strong>{{ failure_records }} records</strong>
+                        <div class="donut-details">
+
+                            <div class="donut-legend-item">
+                                <span class="legend-dot normal-dot"></span>
+                                <div>
+                                    <strong>Normal Assessments</strong>
+                                    <p>{{ normal_records }} records — {{ normal_percentage }}%</p>
+                                </div>
                             </div>
 
-                            <div class="bar-track">
-                                <div class="bar-fill failure" style="width: {{ failure_percentage }}%;"></div>
+                            <div class="donut-legend-item">
+                                <span class="legend-dot failure-dot"></span>
+                                <div>
+                                    <strong>Failure-Risk Assessments</strong>
+                                    <p>{{ failure_records }} records — {{ failure_percentage }}%</p>
+                                </div>
                             </div>
 
-                            <p class="bar-caption">{{ failure_percentage }}% of total assessments</p>
+                            <div class="chart-note">
+                                Highest recorded failure probability:
+                                <strong>{{ highest_probability }}%</strong>
+                            </div>
+
                         </div>
 
-                    </div>
-
-                    <div class="chart-note">
-                        Highest recorded failure probability: <strong>{{ highest_probability }}%</strong>
                     </div>
                 {% else %}
                     <div class="empty-state">
                         <h3>No assessment records yet</h3>
                         <p>Run a machine risk analysis to generate reporting data.</p>
+                        <a class="button primary" href="{{ url_for('main.predict') }}">Run First Analysis</a>
                     </div>
                 {% endif %}
             </div>
@@ -221,7 +227,8 @@
             <div>
                 <h2>Continue machine risk monitoring</h2>
                 <p>
-                    Run another assessment to update the reporting dashboard and trend graph.
+                    Run another assessment to update the circular risk graph,
+                    reporting dashboard and trend graph.
                 </p>
             </div>
 

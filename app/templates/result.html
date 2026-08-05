@@ -7,127 +7,238 @@
 <body>
 
     <nav class="navbar">
-        <div class="nav-brand">Predictive Maintenance DSS</div>
+        <div class="nav-brand">
+            <span class="brand-mark">PM</span>
+            Predictive Maintenance DSS
+        </div>
+
         <div class="nav-links">
             <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('main.predict') }}">Prediction</a>
-            <a href="{{ url_for('main.history') }}">History</a>
+            <a href="{{ url_for('main.predict') }}">Risk Analysis</a>
+            <a href="{{ url_for('main.history') }}">Reports</a>
 
             {% if current_user.role == "admin" %}
                 <a href="{{ url_for('main.users') }}">Users</a>
             {% endif %}
 
-            <a href="{{ url_for('main.logout') }}">Logout</a>
+            <a class="logout-link" href="{{ url_for('main.logout') }}">Logout</a>
         </div>
     </nav>
 
     <main class="container">
 
         <div class="page-header">
-            <p class="eyebrow">Prediction Result</p>
-            <h1>Machine Failure Assessment</h1>
+            <p class="eyebrow">Risk Assessment Result</p>
+            <h1>Machine Failure Prediction Result</h1>
             <p>
-                The prediction below is generated using the trained Gradient Boosting model.
-                The result should support, not replace, engineering judgement.
+                The machine learning model has assessed the submitted operating
+                conditions and produced a failure-risk decision-support result.
             </p>
         </div>
 
         <div class="result-summary">
+
             <div class="result-main">
-                <p class="result-label">System Status</p>
+                <span class="result-label">Prediction Status</span>
+
                 <h2>{{ result.status }}</h2>
-                <p>{{ result.recommendation }}</p>
+
+                <p>
+                    This result is based on the selected machine type, temperature,
+                    rotational speed, torque and tool wear values.
+                </p>
+
+                <br>
+
+                {% if result.prediction == 1 %}
+                    <span class="badge danger">Failure Risk Detected</span>
+                {% else %}
+                    <span class="badge success">Normal Condition</span>
+                {% endif %}
             </div>
 
             <div class="probability-box">
                 <p>Failure Probability</p>
                 <h2>{{ result.failure_probability }}%</h2>
             </div>
+
+        </div>
+
+        <div class="info-card">
+            <div class="table-header">
+                <div>
+                    <h3>Failure Reason Analysis</h3>
+                    <p>
+                        Likely contributing operating condition behind the prediction.
+                    </p>
+                </div>
+
+                {% if result.maintenance_priority == "High Priority" %}
+                    <span class="badge danger">{{ result.maintenance_priority }}</span>
+                {% elif result.maintenance_priority == "Medium Priority" %}
+                    <span class="badge danger">{{ result.maintenance_priority }}</span>
+                {% else %}
+                    <span class="badge success">{{ result.maintenance_priority }}</span>
+                {% endif %}
+            </div>
+
+            <div class="note-box">
+                <strong>Main Likely Reason:</strong>
+
+                {% if result.failure_reason is defined %}
+                    <p>{{ result.failure_reason }}</p>
+                {% else %}
+                    <p>
+                        No detailed reason analysis is available. Please update
+                        app/ml_predictor.py to return failure explanation values.
+                    </p>
+                {% endif %}
+            </div>
+
+            <div class="card-grid">
+
+                <div class="stat-card">
+                    <span class="stat-label">Temperature Gap</span>
+
+                    {% if result.temperature_difference is defined %}
+                        <h3>{{ result.temperature_difference }} K</h3>
+                    {% else %}
+                        <h3>N/A</h3>
+                    {% endif %}
+
+                    <p>Process temperature minus air temperature</p>
+                </div>
+
+                <div class="stat-card">
+                    <span class="stat-label">Mechanical Power</span>
+
+                    {% if result.mechanical_power_kw is defined %}
+                        <h3>{{ result.mechanical_power_kw }} kW</h3>
+                    {% else %}
+                        <h3>N/A</h3>
+                    {% endif %}
+
+                    <p>Estimated from torque and rotational speed</p>
+                </div>
+
+                <div class="stat-card">
+                    <span class="stat-label">Overstrain Index</span>
+
+                    {% if result.overstrain_index is defined %}
+                        <h3>{{ result.overstrain_index }}</h3>
+                    {% else %}
+                        <h3>N/A</h3>
+                    {% endif %}
+
+                    <p>Tool wear multiplied by torque</p>
+                </div>
+
+            </div>
+
+            <div class="side-panel">
+                <h2>Maintenance Recommendation</h2>
+
+                {% if result.maintenance_action is defined %}
+                    <p>{{ result.maintenance_action }}</p>
+                {% else %}
+                    <p>{{ result.recommendation }}</p>
+                {% endif %}
+
+                <br>
+
+                <h2>Detected Risk Indicators</h2>
+
+                {% if result.all_reasons is defined and result.all_reasons %}
+                    <ul>
+                        {% for reason in result.all_reasons %}
+                            <li>{{ reason }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>
+                        No additional risk indicators were returned by the prediction module.
+                    </p>
+                {% endif %}
+            </div>
         </div>
 
         <div class="card-grid two-column">
 
             <div class="info-card">
-                <h3>Prediction Output</h3>
+                <h3>Submitted Operating Conditions</h3>
+                <p>
+                    The following machine parameters were used by the trained
+                    machine learning model.
+                </p>
 
                 <table>
-                    <tr>
-                        <th>Item</th>
-                        <th>Value</th>
-                    </tr>
-                    <tr>
-                        <td>Prediction</td>
-                        <td>
-                            {% if result.prediction == 1 %}
-                                1 - Failure Risk
-                            {% else %}
-                                0 - No Failure
-                            {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Status</td>
-                        <td>{{ result.status }}</td>
-                    </tr>
-                    <tr>
-                        <td>Failure Probability</td>
-                        <td>{{ result.failure_probability }}%</td>
-                    </tr>
-                    <tr>
-                        <td>Recommendation</td>
-                        <td>{{ result.recommendation }}</td>
-                    </tr>
+                    <thead>
+                        <tr>
+                            <th>Input Parameter</th>
+                            <th>Submitted Value</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for key, value in input_values.items() %}
+                            <tr>
+                                <td>{{ key }}</td>
+                                <td>{{ value }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
             </div>
 
             <div class="info-card">
-                <h3>Input Values</h3>
+                <h3>Decision Support Note</h3>
 
-                <table>
-                    <tr>
-                        <th>Feature</th>
-                        <th>Value</th>
-                    </tr>
+                <p>
+                    This prediction should be used as a decision-support output,
+                    not as a final automatic maintenance decision.
+                </p>
 
-                    {% for key, value in input_values.items() %}
-                    <tr>
-                        <td>{{ key }}</td>
-                        <td>{{ value }}</td>
-                    </tr>
-                    {% endfor %}
-                </table>
+                <br>
+
+                <p>
+                    Engineers should review the operating condition, machine
+                    environment, maintenance history and physical inspection
+                    results before taking final maintenance action.
+                </p>
+
+                <div class="note-box">
+                    <strong>Important:</strong>
+                    The system identifies likely risk indicators, not the exact
+                    confirmed physical cause of failure.
+                </div>
             </div>
 
-        </div>
-
-        <div class="info-card">
-            <h3>Decision Support Note</h3>
-            <p>
-                This system provides a machine learning-based risk prediction using machine
-                operating parameters. If failure risk is detected, the machine should be reviewed
-                by an engineer before any maintenance action is taken.
-            </p>
         </div>
 
         <div class="cta-panel">
             <div>
-                <h2>Next Action</h2>
+                <h2>Continue machine risk assessment</h2>
                 <p>
-                    Make another prediction, review the prediction history, or return to the dashboard.
+                    Run another prediction or review previous assessments in the
+                    reporting dashboard.
                 </p>
             </div>
 
-            <div>
-                <a class="button primary" href="{{ url_for('main.predict') }}">Make Another Prediction</a>
-                <a class="button secondary" href="{{ url_for('main.history') }}">View History</a>
-                <a class="button secondary" href="{{ url_for('main.dashboard') }}">Back to Dashboard</a>
+            <div class="hero-actions">
+                <a class="button primary" href="{{ url_for('main.predict') }}">
+                    Run New Assessment
+                </a>
+
+                <a class="button secondary" href="{{ url_for('main.history') }}">
+                    View Reports
+                </a>
             </div>
         </div>
 
     </main>
 
     <footer>
-        <p>MSc Computer Science Project | Predictive Maintenance Decision Support System</p>
+        <p>© 2026 Predictive Maintenance Decision Support System | Industrial Asset Risk Monitoring Platform</p>
     </footer>
 
 </body>

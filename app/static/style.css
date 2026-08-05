@@ -1,7 +1,3 @@
-/* =========================
-   GLOBAL STYLES
-========================= */
-
 * {
     margin: 0;
     padding: 0;
@@ -77,7 +73,7 @@ p {
 
 .nav-links a:hover {
     background: rgba(255, 255, 255, 0.12);
-    color: #ffffff;
+    color: white;
 }
 
 .logout-link {
@@ -85,7 +81,7 @@ p {
 }
 
 /* =========================
-   BRAND MARK
+   BRAND
 ========================= */
 
 .brand-mark {
@@ -154,7 +150,6 @@ p {
 
 .brand-block p {
     color: #dbeafe;
-    font-size: 16px;
 }
 
 .hero-copy h2 {
@@ -242,7 +237,7 @@ p {
 }
 
 /* =========================
-   FORM ELEMENTS
+   FORMS
 ========================= */
 
 .login-form input,
@@ -264,7 +259,7 @@ p {
 .business-form input:focus,
 .business-form select:focus {
     border-color: #2563eb;
-    background: #ffffff;
+    background: white;
     box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
 }
 
@@ -383,7 +378,7 @@ button.secondary:hover {
 }
 
 /* =========================
-   TYPOGRAPHY / LABELS
+   LABELS
 ========================= */
 
 .eyebrow {
@@ -488,7 +483,7 @@ button.secondary:hover {
 }
 
 /* =========================
-   CONTENT BLOCKS
+   CONTENT
 ========================= */
 
 .section-title {
@@ -709,10 +704,6 @@ table tr:hover td {
     margin-bottom: 8px;
 }
 
-/* =========================
-   NOTE BOX / LIST
-========================= */
-
 .note-box {
     margin-top: 18px;
     background: #f8fafc;
@@ -733,7 +724,7 @@ table tr:hover td {
 }
 
 /* =========================
-   HISTORY GRAPH REPORTING
+   HISTORY REPORTING
 ========================= */
 
 .history-visual-grid {
@@ -751,47 +742,105 @@ table tr:hover td {
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
 }
 
-.risk-bars {
-    margin-top: 20px;
+/* =========================
+   CIRCULAR DONUT CHART
+========================= */
+
+.donut-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 28px;
+    align-items: center;
+    margin-top: 24px;
 }
 
-.risk-row {
-    margin-bottom: 26px;
-}
-
-.risk-row-header {
+.donut-chart {
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    background:
+        conic-gradient(
+            #22c55e 0 var(--normal-percent),
+            #ef4444 var(--normal-percent) 100%
+        );
+    position: relative;
     display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 10px;
-    color: #1e293b;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
 }
 
-.bar-track {
-    width: 100%;
-    height: 16px;
-    background: #e2e8f0;
-    border-radius: 999px;
-    overflow: hidden;
+.donut-chart::before {
+    content: "";
+    position: absolute;
+    width: 155px;
+    height: 155px;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px #e2e8f0;
 }
 
-.bar-fill {
-    height: 100%;
-    border-radius: 999px;
+.donut-center {
+    position: relative;
+    z-index: 2;
+    text-align: center;
 }
 
-.bar-fill.normal {
-    background: linear-gradient(135deg, #22c55e, #86efac);
+.donut-center span {
+    display: block;
+    font-size: 38px;
+    font-weight: 800;
+    color: #ef4444;
+    line-height: 1;
 }
 
-.bar-fill.failure {
-    background: linear-gradient(135deg, #ef4444, #f97316);
-}
-
-.bar-caption {
+.donut-center small {
+    display: block;
     margin-top: 8px;
-    font-size: 14px;
     color: #64748b;
+    font-weight: 700;
+}
+
+.donut-details {
+    display: grid;
+    gap: 18px;
+}
+
+.donut-legend-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.donut-legend-item strong {
+    display: block;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.donut-legend-item p {
+    margin: 0;
+    color: #64748b;
+}
+
+.legend-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+}
+
+.normal-dot {
+    background: #22c55e;
+}
+
+.failure-dot {
+    background: #ef4444;
 }
 
 .chart-note {
@@ -802,6 +851,10 @@ table tr:hover td {
     padding: 14px;
     color: #334155;
 }
+
+/* =========================
+   TREND GRAPH
+========================= */
 
 .trend-chart-wrap {
     position: relative;
@@ -835,7 +888,7 @@ table tr:hover td {
 }
 
 .trend-point {
-    fill: #ffffff;
+    fill: white;
     stroke: #1d4ed8;
     stroke-width: 2;
     vector-effect: non-scaling-stroke;
@@ -886,6 +939,10 @@ table tr:hover td {
     color: #64748b;
     font-size: 12px;
 }
+
+/* =========================
+   HISTORY CARDS
+========================= */
 
 .history-card-list {
     display: grid;
@@ -942,7 +999,7 @@ footer p {
 }
 
 /* =========================
-   RESPONSIVE DESIGN
+   RESPONSIVE
 ========================= */
 
 @media (max-width: 1000px) {
@@ -978,6 +1035,17 @@ footer p {
     .record-status {
         text-align: left;
         max-width: none;
+    }
+}
+
+@media (max-width: 800px) {
+    .donut-layout {
+        grid-template-columns: 1fr;
+        justify-items: center;
+    }
+
+    .donut-details {
+        width: 100%;
     }
 }
 
