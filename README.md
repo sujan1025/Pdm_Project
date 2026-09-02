@@ -1,6 +1,6 @@
 # Predictive Maintenance Decision Support System
 
-A secure Flask web application for early machine failure detection using machine learning, SQLite, and a dashboard-based decision support interface.
+A secure Flask web application for early machine failure detection using machine learning.
 
 ## Overview
 
@@ -183,7 +183,6 @@ pdm_project/
 ├── run.py
 ├── requirements.txt
 └── README.md
-
 
 ## Application Workflow
 

@@ -93,7 +93,7 @@ def main():
     summary_path = REPORTS_DIR / "eda_findings.txt"
 
     with open(summary_path, "w", encoding="utf-8") as f:
-        f.write("STEP 2.2 EDA FINDINGS\n")
+        f.write("EDA FINDINGS\n")
         f.write("=====================\n\n")
 
         f.write("Dataset shape:\n")
