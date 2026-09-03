@@ -2,23 +2,28 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 
+# File and output locations
 DATA_PATH = Path("data/ai4i2020.csv")
 REPORTS_DIR = Path("reports")
 FIGURES_DIR = Path("reports/figures")
 
+# Create report folders if they do not exist
 REPORTS_DIR.mkdir(exist_ok=True)
 FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def main():
+    # Load the dataset
     df = pd.read_csv(DATA_PATH)
 
     print("\nStarting Step 2.2: EDA Visualisation...")
 
+    # Important dataset columns
     target_col = "Machine failure"
     type_col = "Type"
     failure_modes = ["TWF", "HDF", "PWF", "OSF", "RNF"]
 
+    # Numerical features used for analysis
     numerical_cols = [
         "Air temperature [K]",
         "Process temperature [K]",
@@ -27,7 +32,7 @@ def main():
         "Tool wear [min]"
     ]
 
-    # 1. Machine failure distribution
+    # 1. Show machine failure distribution
     failure_counts = df[target_col].value_counts().sort_index()
 
     plt.figure(figsize=(6, 4))
@@ -40,7 +45,7 @@ def main():
     plt.savefig(FIGURES_DIR / "machine_failure_distribution.png")
     plt.close()
 
-    # 2. Product type distribution
+    # 2. Show product type distribution
     product_counts = df[type_col].value_counts()
 
     plt.figure(figsize=(6, 4))
@@ -53,7 +58,7 @@ def main():
     plt.savefig(FIGURES_DIR / "product_type_distribution.png")
     plt.close()
 
-    # 3. Failure mode counts
+    # 3. Show counts of each failure type
     failure_mode_counts = df[failure_modes].sum()
 
     plt.figure(figsize=(6, 4))
@@ -66,7 +71,7 @@ def main():
     plt.savefig(FIGURES_DIR / "failure_mode_counts.png")
     plt.close()
 
-    # 4. Numerical histograms
+    # 4. Create histogram for each numerical feature
     for col in numerical_cols:
         plt.figure(figsize=(6, 4))
         df[col].hist(bins=30)
@@ -75,6 +80,7 @@ def main():
         plt.ylabel("Frequency")
         plt.tight_layout()
 
+        # Create a suitable file name for each graph
         file_name = (
             col.replace(" ", "_")
                .replace("[", "")
@@ -85,11 +91,11 @@ def main():
         plt.savefig(FIGURES_DIR / f"{file_name}_histogram.png")
         plt.close()
 
-    # 5. Save mean values by failure status
+    # 5. Save average feature values for failure and non-failure records
     mean_by_failure = df.groupby(target_col)[numerical_cols].mean()
     mean_by_failure.to_csv(REPORTS_DIR / "mean_values_by_failure_status.csv")
 
-    # 6. Save EDA summary text
+    # 6. Save the main EDA findings as a text report
     summary_path = REPORTS_DIR / "eda_findings.txt"
 
     with open(summary_path, "w", encoding="utf-8") as f:
@@ -108,8 +114,15 @@ def main():
 
         f.write("Machine failure distribution:\n")
         f.write(df[target_col].value_counts().sort_index().to_string())
+
         f.write("\n\nMachine failure percentage:\n")
-        f.write((df[target_col].value_counts(normalize=True).sort_index() * 100).round(2).to_string())
+        f.write(
+            (
+                df[target_col]
+                .value_counts(normalize=True)
+                .sort_index() * 100
+            ).round(2).to_string()
+        )
         f.write("\n\n")
 
         f.write("Product type distribution:\n")
@@ -131,6 +144,7 @@ def main():
         f.write("- Numerical histograms were created for the five main sensor features.\n")
         f.write("- These plots help understand feature distributions before preprocessing.\n")
 
+    # Show completion information
     print("\nEDA VISUALISATION COMPLETED")
     print("------------------------------------")
     print("Charts saved inside: reports/figures")
@@ -138,5 +152,6 @@ def main():
     print("Mean values saved as: reports/mean_values_by_failure_status.csv")
 
 
+# Run the script directly
 if __name__ == "__main__":
     main()
